@@ -10,14 +10,10 @@ import com.membase.nodecode.tap.message.TapStreamMessage;
 /**
  *
  */
-public interface TapStream {
+public interface TapStreamConfig {
 	TapStreamConfiguration getConfiguration();
 
-	void prepare();
-
 	void receive(TapStreamMessage streamMessage);
-
-	void cleanup();
 	
 	TapStreamMessage getMessage();
 }

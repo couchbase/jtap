@@ -31,7 +31,10 @@ public class TapStreamMessage {
 	private static final int FLAGS_INDEX = CAS_INDEX + CAS_FIELD_LENGTH;
 	private static final int FLAGS_FIELD_LENGTH = 4;
 	
-	private static final int MIN_HEADER_FIELD_LENGTH = 28;
+	private static final int HEADER_FIELD_LENGTH = CAS_INDEX + CAS_FIELD_LENGTH;
+	
+	private static final int BACKFILL_DATE_FIELD_LENGTH = 8;
+	private static final int ENGINE_PRIVATE_FIELD_LENGTH = 2;
 	
 	private byte magic;
 	private byte opcode;
@@ -44,6 +47,13 @@ public class TapStreamMessage {
 	private byte[] cas;
 	private byte[] flags;
 	private byte[] name;
+	private byte[] backfilldate;
+	
+	private byte[] engineprivate;
+	private byte ttl;
+	private byte reserved1;
+	private byte reserved2;
+	private byte reserved3;
 
 	public TapStreamMessage() {
 		magic = (byte) 0;
@@ -57,6 +67,8 @@ public class TapStreamMessage {
 		cas = new byte[CAS_FIELD_LENGTH];
 		flags = new byte[FLAGS_FIELD_LENGTH];
 		name = null;
+		backfilldate = null;
+		engineprivate = null;
 	}
 	
 	public void setMagic(Magic m) {
@@ -68,7 +80,7 @@ public class TapStreamMessage {
 	}
 	
 	public long getKeylength() {
-		return fieldToInt(keylength);
+		return fieldToLong(keylength);
 	}
 	
 	public void setDatatype(byte b) {
@@ -92,7 +104,7 @@ public class TapStreamMessage {
 	}
 	
 	public long getVbucket() {
-		return fieldToInt(vbucket);
+		return fieldToLong(vbucket);
 	}
 	
 	public void setTotalbody(int i) {
@@ -100,7 +112,7 @@ public class TapStreamMessage {
 	}
 	
 	public long getTotalbody() {
-		return fieldToInt(totalbody);
+		return fieldToLong(totalbody);
 	}
 	
 	public void setOpaque(byte b) {
@@ -108,7 +120,7 @@ public class TapStreamMessage {
 	}
 	
 	public long getOpaque() {
-		return fieldToInt(opaque);
+		return fieldToLong(opaque);
 	}
 	
 	public void setCas(byte b) {
@@ -116,7 +128,7 @@ public class TapStreamMessage {
 	}
 	
 	public long getCas() {
-		return fieldToInt(cas);
+		return fieldToLong(cas);
 	}
 	
 	public void setFlags(Flag[] f) {
@@ -126,7 +138,7 @@ public class TapStreamMessage {
 	}
 	
 	public int getMessageLength() {
-		return MIN_HEADER_FIELD_LENGTH + name.length;
+		return (int) (HEADER_FIELD_LENGTH + getTotalbody());
 	}
 	
 	public void setName(String s) {
@@ -174,6 +186,9 @@ public class TapStreamMessage {
 	}
 	
 	public void decode(byte[] buffer) {
+		int bodylength;
+		int bodycounter;
+		
 		magic = buffer[MAGIC_INDEX];
 		opcode = buffer[OPCODE_INDEX];
 		
@@ -188,6 +203,7 @@ public class TapStreamMessage {
 		
 		for(int i = 0; i < TOTAL_BODY_FIELD_LENGTH; i++)
 			totalbody[i] = buffer[TOTAL_BODY_INDEX + i];
+		bodycounter = bodylength = (int)getTotalbody();
 		
 		for(int i = 0; i < OPAQUE_FIELD_LENGTH; i++)
 			opaque[i] = buffer[OPAQUE_INDEX + i];
@@ -195,7 +211,10 @@ public class TapStreamMessage {
 		for(int i = 0; i < CAS_FIELD_LENGTH; i++)
 			cas[i] = buffer[CAS_INDEX + i];
 		
-		for(int i = 0; i < FLAGS_FIELD_LENGTH; i++)
+		for(int i = 0; i < ENGINE_PRIVATE_FIELD_LENGTH && bodylength > bodycounter; i++, bodycounter++)
+			engineprivate[i] = buffer[HEADER_FIELD_LENGTH + bodycounter];
+			
+		for(int i = 0; i < FLAGS_FIELD_LENGTH && bodylength > bodycounter; i++, bodycounter++)
 			flags[i] = buffer[FLAGS_INDEX + i];
 	}
 	
@@ -236,11 +255,19 @@ public class TapStreamMessage {
 		System.out.println("---------------------------");
 	}
 	
-	private long fieldToInt(byte[] ba) {
+	private long fieldToLong(byte[] ba) {
 		long total = 0;
+		long val = 0;
 		for (int i = 0; i < ba.length; i++) {
-			total += (long)Math.pow((double) 256, (double) (ba.length - 1 - i)) * (long)ba[i];
+			val = ba[i];
+			if (val < 0)
+				val = val + 256;
+			total += (long)Math.pow((double) 256, (double) (ba.length - 1 - i)) * val;
 		}
 		return total;
+	}
+	
+	private void longToField(long l) {
+		
 	}
 }

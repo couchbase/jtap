@@ -1,5 +1,5 @@
 package com.membase.nodecode.tap.ops;
 
-public class KeysOnlyStreamListener {
+public class SupportAckStreamConfig {
 
 }

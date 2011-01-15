@@ -17,24 +17,24 @@ import com.membase.nodecode.tap.message.TapStreamMessage;
 /**
  *
  */
-public class DumpStream implements TapStream {
+public class KeysOnlyStreamConfig implements TapStreamConfig {
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DumpStream.class);
+			.getLogger(DumpStreamConfig.class);
 
 	private int count;
-	private boolean cleanup;
 	private String bucketName;
 	private String bucketPassword;
+	private String identifier;
 	private TapStreamMessage message;
-
-	public DumpStream(String bucketName, String bucketPassword, String identifier) {
+	
+	public KeysOnlyStreamConfig(String bucketName, String bucketPassword, String identifier) {
 		this.bucketName = bucketName;
 		this.bucketPassword = bucketPassword;
-		this.cleanup = false;
+		this.identifier = identifier;
+		this.message = new TapStreamMessage();
 		
 		Flag[] flags = new Flag[1];
-		flags[0] = Flag.DUMP;
-		message = new TapStreamMessage();
+		flags[0] = Flag.KEYS_ONLY;
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
 		message.setFlags(flags);
@@ -49,11 +49,6 @@ public class DumpStream implements TapStream {
 		LOG.debug("sending configuration");
 		return new TapStreamConfiguration("testnode", bucketName, bucketPassword, TapStreamType.DUMP);
 	}
-
-	@Override
-	public void prepare() {
-		LOG.debug("prepare called");
-	}
 	
 	public TapStreamMessage getMessage() {
 		return message;
@@ -61,13 +56,7 @@ public class DumpStream implements TapStream {
 
 	@Override
 	public void receive(TapStreamMessage streamMessage) {
-		// LOG.debug( "received: " + Integer.toHexString( streamMessage.op ) );
 		count++;
 	}
-
-	@Override
-	public void cleanup() {
-		LOG.debug("cleanup called");
-		cleanup = true;
-	}
 }
+
