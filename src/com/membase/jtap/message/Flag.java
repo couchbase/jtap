@@ -1,4 +1,4 @@
-package com.membase.nodecode.tap.message;
+package com.membase.jtap.message;
 
 public enum Flag {
 	BACKFILL((byte) 0x01),
@@ -12,5 +12,16 @@ public enum Flag {
 
 	Flag(byte flag) {
 		this.flag = flag;
+	}
+	
+	boolean hasFlag(int f) {
+		int bit = 0;
+		for (int i = 1; i <= this.flag; i *= 2) {
+			bit = f % 2;
+			f = f / 2;
+		}
+		if (bit == 0)
+			return false;
+		return true;
 	}
 }

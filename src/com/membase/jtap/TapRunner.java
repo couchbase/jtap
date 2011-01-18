@@ -1,0 +1,27 @@
+package com.membase.jtap;
+
+import com.membase.jtap.internal.TapStreamClient;
+import com.membase.jtap.ops.BackfillStream;
+import com.membase.jtap.ops.DumpStream;
+import com.membase.jtap.ops.KeysOnlyStream;
+import com.membase.jtap.ops.ListVBucketsStream;
+import com.membase.jtap.ops.TapStream;
+
+public class TapRunner {
+	public static void main(String args[]) {
+		int[] vbucketlist = {1, 2, 1002};
+		//TapStreamConfig tapListener = new DumpStreamConfig("default", null, "node1");
+		TapStream tapListener = new BackfillStream("default", null, "node1");
+		//TapStreamConfig tapListener = new KeysOnlyStreamConfig("default", null, "node1");
+		//TapStreamConfig tapListener = new ListVBucketsStreamConfig("default", null, "node1", vbucketlist);
+		TapStreamClient client = new TapStreamClient("10.2.1.11", 11210);
+		client.start(tapListener);
+		try {
+			Thread.sleep(360000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		client.stop();
+	}
+}

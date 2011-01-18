@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Membase. All Rights Reserved.
  */
 
-package com.membase.nodecode.tap.internal;
+package com.membase.jtap.internal;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -11,11 +11,9 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.membase.nodecode.tap.TapStreamConfiguration;
-import com.membase.nodecode.tap.message.Magic;
-import com.membase.nodecode.tap.message.Response;
-import com.membase.nodecode.tap.message.TapStreamMessage;
-import com.membase.nodecode.tap.ops.TapStreamConfig;
+import com.membase.jtap.message.RequestMessage;
+import com.membase.jtap.message.ResponseMessage;
+import com.membase.jtap.ops.TapStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,66 +22,75 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class TapStreamClient {
-	
 	private static final Logger LOG = LoggerFactory.getLogger(TapStreamClient.class);
 	
+	private boolean started;
 	private String host;
 	private int port;
 	private SocketChannel channel;
-	private String tapName;
-	private TapStreamConfig tapListener;
 	private BlockingQueue<Response> rQueue;
 	private Thread mbuilder;
 	private Thread reader;
 	
 	public TapStreamClient(String host, int port) {
+		started = false;
 		this.host = host;
 		this.port = port;
 		rQueue = new LinkedBlockingQueue<Response>();
 	}
 
-	public void start(TapStreamConfig tapConfig) {
-		this.tapListener = tapConfig;
-		this.tapName = tapConfig.getConfiguration().getTapName();
+	public void start(TapStream tapStream) {
+		LOG.info("starting stream client");
 
-		LOG.info("starting stream client: {}", tapName);
-		TapStreamConfiguration configuration = tapConfig.getConfiguration();
-
-		channel = connect(tapConfig);
+		channel = connect(tapStream);
 		
 		// Configure SASL Bucket Authentication
 
 		LOG.info("initializing tap request");
-		TapStreamMessage message = tapConfig.getMessage();
+		RequestMessage message = tapStream.getMessage();
 		message.printMessage();
 		handleWrite(message);
 		
 		reader = new Thread(new SocketReader(rQueue, channel));
-		mbuilder = new Thread(new ResponseMessageBuilder(rQueue, tapConfig));
+		mbuilder = new Thread(new ResponseMessageBuilder(rQueue, tapStream));
 		mbuilder.start();
 		reader.start();
-		
-		
-		
+		started = true;
 	}
 
 	public void stop() {
-		LOG.info("stopping stream client for {}", tapName);
-		if (channel.isOpen()) {
-			try {
-				channel.close();
-			} catch (IOException e) {
-				LOG.info("Error closing channel");
-				e.printStackTrace();
+		if (started) {
+			LOG.info("stopping stream client");
+			
+			if (channel.isOpen()) {
+				try {
+					channel.close();
+				} catch (IOException e) {
+					LOG.info("Error closing channel");
+					e.printStackTrace();
+				}
 			}
+			
+			reader.interrupt();
+			
+			while (rQueue.size() > 0) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+				}
+			}
+			mbuilder.interrupt();
+			
+			
+		} else {
+			LOG.info("Tap stream not started. Cannot be stopped.");
 		}
 	}
 	
-	private int handleWrite(TapStreamMessage message) {
+	private int handleWrite(RequestMessage message) {
 		int bytesWritten = 0;
 		
-		ByteBuffer buf = ByteBuffer.allocateDirect(message.getMessageLength());
-		buf.put(message.encode());
+		ByteBuffer buf = message.getBytes();
 		buf.position(0);
 		try {
 			bytesWritten = channel.write(buf);
@@ -93,7 +100,7 @@ public class TapStreamClient {
 		return bytesWritten;
 	}
 
-	private SocketChannel connect(TapStreamConfig tapListener) {
+	private SocketChannel connect(TapStream tapListener) {
 		InetSocketAddress socketAddress = new InetSocketAddress(host, port);
 
 		SocketChannel sChannel = null;
@@ -123,8 +130,8 @@ class ResponseMessageBuilder implements Runnable {
 	private static final int HEADER_LENGTH = 24;
 	
 	private BlockingQueue<Response> rQueue;
-	private TapStreamConfig tapListener;
-	private TapStreamMessage message;
+	private TapStream tapStream;
+	private ResponseMessage message;
 	
 	private Response response;
 	private ByteBuffer buffer;
@@ -134,39 +141,40 @@ class ResponseMessageBuilder implements Runnable {
 	byte[] hBuffer;
 	byte[] mBuffer;
 	
-	public ResponseMessageBuilder(BlockingQueue<Response> rQueue, TapStreamConfig tapListener) {
+	public ResponseMessageBuilder(BlockingQueue<Response> rQueue, TapStream tapStream) {
 		this.rQueue = rQueue;
-		this.tapListener = tapListener;
+		this.tapStream = tapStream;
 		this.message = null;
 	}
 	
 	@Override
 	public void run() {
 		int bodyLength;
-		getNextResponse();
 		
-		while(true) {
-			parseHeader();
-			bodyLength = getTotalBody();
-			mBuffer = new byte[HEADER_LENGTH + bodyLength];
-			//System.out.println("Printing Header (mBuffer is " + mBuffer.length + ")");
-			for (int i = 0; i < HEADER_LENGTH; i ++) {
-				//System.out.printf("%x ", hBuffer[i]);
-				mBuffer[i] = hBuffer[i];
+		try {
+			getNextResponse();
+			while(true) {
+				parseHeader();
+				bodyLength = getTotalBody();
+				mBuffer = new byte[HEADER_LENGTH + bodyLength];
+				
+				for (int i = 0; i < HEADER_LENGTH; i ++)
+					mBuffer[i] = hBuffer[i];
+				
+				for (int i = 0; i < bodyLength; i++, position++) {
+					if (position == bufferLength)
+						getNextResponse();
+					mBuffer[i + HEADER_LENGTH] = buffer.get(position);
+				}
+				
+				message = new ResponseMessage(mBuffer);
+				message.printMessage();
+				tapStream.receive(message);
 			}
-			
-			for (int i = 0; i < bodyLength; i++, position++) {
-				if (position == bufferLength)
-					getNextResponse();
-				mBuffer[i + HEADER_LENGTH] = buffer.get(position);
-			}
-			message = new TapStreamMessage();
-			message.decode(mBuffer);
-			message.printMessageDetails();
-		}
+		} catch (InterruptedException e) {}
 	}
 	
-	private void parseHeader() {
+	private void parseHeader() throws InterruptedException {
 		hBuffer = new byte[HEADER_LENGTH];
 		
 		for (int i = 0; i < HEADER_LENGTH; i++, position++) {
@@ -177,17 +185,12 @@ class ResponseMessageBuilder implements Runnable {
 	}
 	
 	private int getTotalBody() {
+		//TODO: This is bad coding
 		return hBuffer[8] * 16777216 + hBuffer[9] * 65535 + hBuffer[10] * 256 + hBuffer[11];
 	}
 	
-	private void getNextResponse() {
-		try {
-			response = rQueue.take();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("Got a response from the queue");
+	private void getNextResponse() throws InterruptedException {
+		response = rQueue.take();
 		buffer = response.getBuffer();
 		bufferLength = response.getBufferLength();
 		position = 0;
@@ -208,13 +211,10 @@ class SocketReader implements Runnable {
 	@Override
 	public void run() {
 		int bytesRead = 0;
-		int i = 0;
-		while (bytesRead >= 0 && i < 10) {
-			i++;
+		while (bytesRead >= 0) {
 			bytesRead = handleReads();
-			System.out.println("Handling Read " + bytesRead + "  bytes read");
+			//System.out.println("Handling Read " + bytesRead + "  bytes read");
 		}
-		System.out.println("Size: " + rQueue.size());
 	}
 	
 	private int handleReads() {
@@ -229,9 +229,27 @@ class SocketReader implements Runnable {
 		    	rQueue.add(new Response(rbuf, bytesRead));
 		    }
 		} catch (IOException e) {
-		    // Connection may have been closed
+		    System.out.println("Connection Closed");
+		    return -1;
 		}
 		return bytesRead;
+	}	
+}
+
+class Response {
+	private ByteBuffer buffer;
+	private int bufferLength;
+	
+	public Response(ByteBuffer buffer, int bufferLength) {
+		this.buffer = buffer;
+		this.bufferLength = bufferLength;
 	}
 	
+	public ByteBuffer getBuffer() {
+		return buffer;
+	}
+	
+	public int getBufferLength() {
+		return bufferLength;
+	}
 }

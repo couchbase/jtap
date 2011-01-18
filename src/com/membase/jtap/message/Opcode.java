@@ -1,6 +1,7 @@
-package com.membase.nodecode.tap.message;
+package com.membase.jtap.message;
 
 public enum Opcode {
+	NOOP((byte) 0x0a),
 	REQUEST((byte) 0x40),
 	MUTATION((byte) 0x41),
 	DELETE((byte) 0x42),

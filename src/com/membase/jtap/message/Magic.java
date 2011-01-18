@@ -1,4 +1,4 @@
-package com.membase.nodecode.tap.message;
+package com.membase.jtap.message;
 
 public enum Magic {
 	PROTOCOL_BINARY_REQ((byte) 0x80);

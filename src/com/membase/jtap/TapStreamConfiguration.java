@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Membase. All Rights Reserved.
  */
 
-package com.membase.nodecode.tap;
+package com.membase.jtap;
 
 import java.util.Date;
 
@@ -15,7 +15,6 @@ public class TapStreamConfiguration {
 	private String tapName;
 	private String bucketName;
 	private String bucketPassword;
-	private TapStreamType streamType;
 	private long startTime;
 
 	public TapStreamConfiguration(String tapName) {
@@ -23,11 +22,10 @@ public class TapStreamConfiguration {
 	}
 
 	public TapStreamConfiguration(String tapName, String bucketName,
-			String bucketPassword, TapStreamType streamType) {
+			String bucketPassword) {
 		this.bucketPassword = bucketPassword;
 		setTapName(tapName);
 		setBucketName(bucketName);
-		this.streamType = streamType;
 	}
 
 	private void setTapName(String tapName) {
@@ -54,14 +52,6 @@ public class TapStreamConfiguration {
 
 	public String getBucketPassword() {
 		return bucketPassword;
-	}
-
-	public TapStreamType getStreamType() {
-		return streamType;
-	}
-
-	public void setStreamType(TapStreamType streamType) {
-		this.streamType = streamType;
 	}
 
 	public long getStartTime() {
