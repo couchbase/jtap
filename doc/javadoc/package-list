@@ -1,0 +1,6 @@
+com.membase.jtap
+com.membase.jtap.exception
+com.membase.jtap.exporter
+com.membase.jtap.internal
+com.membase.jtap.message
+com.membase.jtap.ops
