@@ -10,6 +10,11 @@ import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 
+/**
+ * ListVBucketStream is a template class for starting a basic tap connection to a membase
+ * server. It takes a identifier string and a vBucket list that specifies which buckets
+ * to stream mutations from.
+ */
 public class ListVBucketsStream implements TapStream{
 	private static final Logger LOG = LoggerFactory.getLogger(ListVBucketsStream.class);
 
@@ -17,6 +22,12 @@ public class ListVBucketsStream implements TapStream{
 	private Exporter exporter;
 	private RequestMessage message;
 
+	/**
+	 * Creates a default list vBuckets stream.
+	 * @param exporter - Specifies how you tap stream data will be exported.
+	 * @param identifier - Specifies an identifier which can be used to recover a closed tap stream.
+	 * @param vbucketlist - A list specifying which vBucket to get mutations for.
+	 */
 	public ListVBucketsStream(Exporter exporter, String identifier, int[] vbucketlist) {
 		this.count = 0;
 		this.exporter = exporter;
@@ -31,11 +42,19 @@ public class ListVBucketsStream implements TapStream{
 		LOG.info("List vBucket tap stream created");
 	}
 
+	/**
+	 * Returns an object that contains a representation of the tap stream message that initiates the
+	 * tap stream.
+	 */
 	@Override
 	public RequestMessage getMessage() {
 		return message;
 	}
 
+	/**
+	 * Specifies how a received tap stream message will interact with the streams exporter.
+	 * @param streamMessage - The message received from the Membase.
+	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {
 		// TODO: Should I be synchronized
@@ -45,6 +64,9 @@ public class ListVBucketsStream implements TapStream{
 		}
 	}
 
+	/**
+	 * Returns the number of messages that this tap stream has handled.
+	 */
 	@Override
 	public long getCount() {
 		return count;

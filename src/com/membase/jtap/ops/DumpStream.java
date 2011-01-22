@@ -14,6 +14,12 @@ import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 
+/**
+ * DumpStream is a template class for starting a basic tap connection to a membase
+ * server. It takes a identifier string which is used to restart connections that are
+ * interrupted prematurely. Membase will dump all of the items in a given node and transmit
+ * the key name and value of each key-value pair.
+ */
 public class DumpStream implements TapStream {
 	private static final Logger LOG = LoggerFactory.getLogger(DumpStream.class);
 
@@ -21,6 +27,11 @@ public class DumpStream implements TapStream {
 	private RequestMessage message;
 	private Exporter exporter;
 	
+	/**
+	 * Creates a default dump stream.
+	 * @param exporter - Specifies how you tap stream data will be exported.
+	 * @param identifier - Specifies an identifier which can be used to recover a closed tap stream.
+	 */
 	public DumpStream(Exporter exporter, String identifier) {
 		this.count = 0;
 		this.exporter = exporter;
@@ -34,11 +45,19 @@ public class DumpStream implements TapStream {
 		LOG.info("Dump tap stream created");
 	}
 	
+	/**
+	 * Returns an object that contains a representation of the tap stream message that initiates the
+	 * tap stream.
+	 */
 	@Override
 	public RequestMessage getMessage() {
 		return message;
 	}
 
+	/**
+	 * Specifies how a received tap stream message will interact with the streams exporter.
+	 * @param streamMessage - The message received from the Membase.
+	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {
 		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
@@ -47,6 +66,9 @@ public class DumpStream implements TapStream {
 		}
 	}
 
+	/**
+	 * Returns the number of messages that this tap stream has handled.
+	 */
 	@Override
 	public long getCount() {
 		return count;
