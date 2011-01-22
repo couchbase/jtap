@@ -22,6 +22,7 @@ public class DumpStream implements TapStream {
 	private Exporter exporter;
 	
 	public DumpStream(Exporter exporter, String identifier) {
+		this.count = 0;
 		this.exporter = exporter;
 		this.message = new RequestMessage();
 		
@@ -44,5 +45,10 @@ public class DumpStream implements TapStream {
 			exporter.write(streamMessage.getKey(), streamMessage.getValue());
 			count++;
 		}
+	}
+
+	@Override
+	public long getCount() {
+		return count;
 	}
 }

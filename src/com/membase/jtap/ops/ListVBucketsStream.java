@@ -18,6 +18,7 @@ public class ListVBucketsStream implements TapStream{
 	private RequestMessage message;
 
 	public ListVBucketsStream(Exporter exporter, String identifier, int[] vbucketlist) {
+		this.count = 0;
 		this.exporter = exporter;
 		this.message = new RequestMessage();
 
@@ -37,9 +38,15 @@ public class ListVBucketsStream implements TapStream{
 
 	@Override
 	public void receive(ResponseMessage streamMessage) {
+		// TODO: Should I be synchronized
 		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
 			exporter.write(streamMessage.getKey(), streamMessage.getValue());
 			count++;
 		}
+	}
+
+	@Override
+	public long getCount() {
+		return count;
 	}
 }

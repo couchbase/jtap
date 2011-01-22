@@ -20,6 +20,7 @@ public class CustomStream implements TapStream {
 	private Exporter exporter;
 
 	public CustomStream(Exporter exporter, String identifier) {
+		this.count = 0;
 		this.exporter = exporter;
 		this.message = new RequestMessage();
 
@@ -67,5 +68,10 @@ public class CustomStream implements TapStream {
 	
 	public void keysOnly() {
 
+	}
+
+	@Override
+	public long getCount() {
+		return count;
 	}
 }

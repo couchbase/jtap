@@ -13,8 +13,10 @@ import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 
 /**
- * BackfillStream is a template class for starting a basic tap connection to 
- *
+ * BackfillStream is a template class for starting a basic tap connection to a membase
+ * server. It takes a identifier string and a date that specifies which items to send.
+ * Membase will send all key-value pairs with a timestamp set after the specified date.
+ * If the date is in the future membase will send all future key-value mutations.
  */
 public class BackfillStream implements TapStream {
 	private static final Logger LOG = LoggerFactory.getLogger(BackfillStream.class);
@@ -24,6 +26,7 @@ public class BackfillStream implements TapStream {
 	private RequestMessage message;
 
 	public BackfillStream(Exporter exporter, String identifier, Date date) {
+		this.count = 0;
 		this.exporter = exporter;
 		this.message = new RequestMessage();
 
@@ -47,5 +50,10 @@ public class BackfillStream implements TapStream {
 			exporter.write(streamMessage.getKey(), streamMessage.getValue());
 			count++;
 		}
+	}
+	
+	@Override
+	public long getCount() {
+		return count;
 	}
 }

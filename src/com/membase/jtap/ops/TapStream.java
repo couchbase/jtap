@@ -11,8 +11,9 @@ import com.membase.jtap.message.ResponseMessage;
  *
  */
 public interface TapStream {
-
 	void receive(ResponseMessage streamMessage);
 	
 	RequestMessage getMessage();
+	
+	long getCount();
 }

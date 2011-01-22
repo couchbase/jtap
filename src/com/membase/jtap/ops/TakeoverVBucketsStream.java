@@ -18,6 +18,7 @@ public class TakeoverVBucketsStream implements TapStream {
 	private RequestMessage message;
 
 	public TakeoverVBucketsStream(Exporter exporter, String identifier, int[] vbucketlist) {
+		this.count = 0;
 		this.exporter = exporter;
 		this.message = new RequestMessage();
 
@@ -41,5 +42,10 @@ public class TakeoverVBucketsStream implements TapStream {
 			exporter.write(streamMessage.getKey(), streamMessage.getValue());
 			count++;
 		}
+	}
+
+	@Override
+	public long getCount() {
+		return count;
 	}
 }

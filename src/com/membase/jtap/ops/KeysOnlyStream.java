@@ -22,6 +22,7 @@ public class KeysOnlyStream implements TapStream {
 	private RequestMessage message;
 	
 	public KeysOnlyStream(Exporter exporter, String identifier) {
+		this.count = 0;
 		this.exporter = exporter;
 		this.message = new RequestMessage();
 		
@@ -44,6 +45,11 @@ public class KeysOnlyStream implements TapStream {
 			exporter.write(streamMessage.getKey());
 		}
 		count++;
+	}
+
+	@Override
+	public long getCount() {
+		return count;
 	}
 }
 
