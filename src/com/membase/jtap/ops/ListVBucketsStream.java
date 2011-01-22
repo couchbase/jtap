@@ -24,9 +24,9 @@ public class ListVBucketsStream implements TapStream{
 
 	/**
 	 * Creates a default list vBuckets stream.
-	 * @param exporter - Specifies how you tap stream data will be exported.
-	 * @param identifier - Specifies an identifier which can be used to recover a closed tap stream.
-	 * @param vbucketlist - A list specifying which vBucket to get mutations for.
+	 * @param exporter Specifies how you tap stream data will be exported.
+	 * @param identifier Specifies an identifier which can be used to recover a closed tap stream.
+	 * @param vbucketlist A list specifying which vBucket to get mutations for.
 	 */
 	public ListVBucketsStream(Exporter exporter, String identifier, int[] vbucketlist) {
 		this.count = 0;
@@ -53,7 +53,7 @@ public class ListVBucketsStream implements TapStream{
 
 	/**
 	 * Specifies how a received tap stream message will interact with the streams exporter.
-	 * @param streamMessage - The message received from the Membase.
+	 * @param streamMessage The message received from the Membase.
 	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {

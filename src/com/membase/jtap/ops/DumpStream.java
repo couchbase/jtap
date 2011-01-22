@@ -29,8 +29,8 @@ public class DumpStream implements TapStream {
 	
 	/**
 	 * Creates a default dump stream.
-	 * @param exporter - Specifies how you tap stream data will be exported.
-	 * @param identifier - Specifies an identifier which can be used to recover a closed tap stream.
+	 * @param exporter Specifies how you tap stream data will be exported.
+	 * @param identifier Specifies an identifier which can be used to recover a closed tap stream.
 	 */
 	public DumpStream(Exporter exporter, String identifier) {
 		this.count = 0;
@@ -56,7 +56,7 @@ public class DumpStream implements TapStream {
 
 	/**
 	 * Specifies how a received tap stream message will interact with the streams exporter.
-	 * @param streamMessage - The message received from the Membase.
+	 * @param streamMessage The message received from the Membase.
 	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {

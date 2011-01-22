@@ -20,7 +20,7 @@ public interface TapStream {
 	
 	/**
 	 * Specifies how a received tap stream message will interact with the streams exporter.
-	 * @param streamMessage - The message received from the Membase.
+	 * @param streamMessage The message received from the Membase.
 	 */
 	RequestMessage getMessage();
 	

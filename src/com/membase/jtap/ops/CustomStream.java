@@ -14,21 +14,21 @@ import com.membase.jtap.message.ResponseMessage;
 
 /**
  * CustomStream allows for the creation of a tap stream by combining many of the different
- * types tap request together into one single request. 
- * 
- * For example, let's say we wanted a tap message that did the following:
- * - We want all future mutations of items in vBucket 0-4
- * - We want server acknowledgments so that we can throttle the amount of tap responses
- * - We only want the key and not the values of each key-value pair
- * 
- * We would write the following code:
- * 
- * TapStream tapstream = new CustomStream(); // Gives us a basic tap message
- * tapstream.setBackfill(null); // Specifies only future mutations
- * tapstream.specifyVbuckets(new int[] {0, 1, 2, 3, 4}); // Get mutations from vBuckets 0-4
- * tapstream.supportAck(); // Get acknowledgment messages from the server
- * tapstream.keysOnly(); // Only send the keys and not the values
- * 
+ * types tap request together into one single request.<br> 
+ * <br>
+ * For example, let's say we wanted a tap message that did the following:<br>
+ * - We want all future mutations of items in vBucket 0-4<br>
+ * - We want server acknowledgments so that we can throttle the amount of tap responses<br>
+ * - We only want the key and not the values of each key-value pair<br>
+ * <br>
+ * We would write the following code:<br>
+ * <br>
+ * TapStream tapstream = new CustomStream(); // Gives us a basic tap message<br>
+ * tapstream.setBackfill(null); // Specifies only future mutations<br>
+ * tapstream.specifyVbuckets(new int[] {0, 1, 2, 3, 4}); // Get mutations from vBuckets 0-4<br>
+ * tapstream.supportAck(); // Get acknowledgment messages from the server<br>
+ * tapstream.keysOnly(); // Only send the keys and not the values<br>
+ * <br>
  * Then all thats left is to pass this tap stream to your tap client and start the stream.
  */
 public class CustomStream implements TapStream {
@@ -42,8 +42,8 @@ public class CustomStream implements TapStream {
 	 * Creates a default custom stream. The custom tap stream starts out as a tap message header
 	 * but can take on greater functionality by calling functions in this class that allow it to
 	 * specify more intricate details.
-	 * @param exporter - Specifies how you tap stream data will be exported.
-	 * @param identifier - Specifies an identifier which can be used to recover a closed tap stream.
+	 * @param exporter Specifies how you tap stream data will be exported.
+	 * @param identifier Specifies an identifier which can be used to recover a closed tap stream.
 	 */
 	public CustomStream(Exporter exporter, String identifier) {
 		this.count = 0;
@@ -68,7 +68,7 @@ public class CustomStream implements TapStream {
 
 	/**
 	 * Specifies how a received tap stream message will interact with the streams exporter.
-	 * @param streamMessage - The message received from the Membase.
+	 * @param streamMessage The message received from the Membase.
 	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {

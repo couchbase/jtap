@@ -28,9 +28,9 @@ public class BackfillStream implements TapStream {
 
 	/**
 	 * Creates a default backfill stream.
-	 * @param exporter - Specifies how you tap stream data will be exported.
-	 * @param identifier - Specifies an identifier which can be used to recover a closed tap stream.
-	 * @param date - Specifies a date for when to start streaming items. If this date is set to any
+	 * @param exporter Specifies how you tap stream data will be exported.
+	 * @param identifier Specifies an identifier which can be used to recover a closed tap stream.
+	 * @param date Specifies a date for when to start streaming items. If this date is set to any
 	 * time in the future then the tap stream will immediately begin streaming any new tap mutations.
 	 */
 	public BackfillStream(Exporter exporter, String identifier, Date date) {
@@ -58,7 +58,7 @@ public class BackfillStream implements TapStream {
 
 	/**
 	 * Specifies how a received tap stream message will interact with the streams exporter.
-	 * @param streamMessage - The message received from the Membase.
+	 * @param streamMessage The message received from the Membase.
 	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {
