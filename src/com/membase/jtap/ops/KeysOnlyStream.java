@@ -7,28 +7,22 @@ package com.membase.jtap.ops;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.membase.jtap.internal.TapStreamConfiguration;
+import com.membase.jtap.exporter.Exporter;
 import com.membase.jtap.message.Flag;
 import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 
-/**
- *
- */
 public class KeysOnlyStream implements TapStream {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(KeysOnlyStream.class);
+	private static final Logger LOG = LoggerFactory.getLogger(KeysOnlyStream.class);
 
-	private int count;
-	private String bucketName;
-	private String bucketPassword;
+	private long count;
+	private Exporter exporter;
 	private RequestMessage message;
 	
-	public KeysOnlyStream(String bucketName, String bucketPassword, String identifier) {
-		this.bucketName = bucketName;
-		this.bucketPassword = bucketPassword;
+	public KeysOnlyStream(Exporter exporter, String identifier) {
+		this.exporter = exporter;
 		this.message = new RequestMessage();
 		
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
@@ -36,23 +30,19 @@ public class KeysOnlyStream implements TapStream {
 		message.setFlags(Flag.KEYS_ONLY.flag);
 		message.setName(identifier);
 		
-		message.setTotalbody(9);
-		message.setExtralength(4);
-	}
-
-	@Override
-	public TapStreamConfiguration getConfiguration() {
-		LOG.debug("sending configuration");
-		return new TapStreamConfiguration("testnode", bucketName, bucketPassword);
+		LOG.info("Keys only tap stream created");
 	}
 	
+	@Override
 	public RequestMessage getMessage() {
 		return message;
 	}
 
 	@Override
 	public void receive(ResponseMessage streamMessage) {
-		System.out.println("Key: " + streamMessage.getKey());
+		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
+			exporter.write(streamMessage.getKey());
+		}
 		count++;
 	}
 }

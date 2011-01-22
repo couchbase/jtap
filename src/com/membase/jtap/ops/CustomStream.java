@@ -5,8 +5,8 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.membase.jtap.internal.TapStreamConfiguration;
-import com.membase.jtap.message.Flag;
+import com.membase.jtap.exception.FieldDoesNotExistException;
+import com.membase.jtap.exporter.Exporter;
 import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
@@ -15,28 +15,22 @@ import com.membase.jtap.message.ResponseMessage;
 public class CustomStream implements TapStream {
 	private static final Logger LOG = LoggerFactory.getLogger(CustomStream.class);
 
-	private int count;
-	private String bucketName;
-	private String bucketPassword;
+	private long count;
 	private RequestMessage message;
+	private Exporter exporter;
 
-	public CustomStream(String bucketName, String bucketPassword, String identifier) {
-		this.bucketName = bucketName;
-		this.bucketPassword = bucketPassword;
+	public CustomStream(Exporter exporter, String identifier) {
+		this.exporter = exporter;
 		this.message = new RequestMessage();
 
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
 		message.setName(identifier);
+		
+		LOG.info("Custom tap stream created");
 	}
 
 	@Override
-	public TapStreamConfiguration getConfiguration() {
-		LOG.debug("sending configuration");
-		return new TapStreamConfiguration("testnode", bucketName,
-				bucketPassword);
-	}
-
 	public RequestMessage getMessage() {
 		return message;
 	}
@@ -44,8 +38,13 @@ public class CustomStream implements TapStream {
 	@Override
 	public void receive(ResponseMessage streamMessage) {
 		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
-			System.out.println("Key: " + streamMessage.getKey());
-			System.out.println("Value: " + streamMessage.getValue());
+			String key = streamMessage.getKey();
+			try {
+				String value = streamMessage.getValue();
+				exporter.write(key, value);
+			} catch (FieldDoesNotExistException e) {
+				exporter.write(key);
+			}
 			count++;
 		}
 	}
@@ -67,6 +66,6 @@ public class CustomStream implements TapStream {
 	}
 	
 	public void keysOnly() {
-		
+
 	}
 }

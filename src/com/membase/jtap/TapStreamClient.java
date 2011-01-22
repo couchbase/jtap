@@ -11,15 +11,8 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.security.sasl.Sasl;
-import javax.security.sasl.SaslClient;
-import javax.security.sasl.SaslException;
-
-import com.membase.jtap.internal.PlainCallbackHandler;
 import com.membase.jtap.internal.Response;
 import com.membase.jtap.internal.SASLAuthenticator;
-import com.membase.jtap.message.BaseMessage;
-import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;

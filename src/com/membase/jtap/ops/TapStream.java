@@ -4,7 +4,6 @@
 
 package com.membase.jtap.ops;
 
-import com.membase.jtap.internal.TapStreamConfiguration;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 
@@ -12,7 +11,6 @@ import com.membase.jtap.message.ResponseMessage;
  *
  */
 public interface TapStream {
-	TapStreamConfiguration getConfiguration();
 
 	void receive(ResponseMessage streamMessage);
 	

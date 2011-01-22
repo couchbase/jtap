@@ -3,7 +3,7 @@ package com.membase.jtap.ops;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.membase.jtap.internal.TapStreamConfiguration;
+import com.membase.jtap.exporter.Exporter;
 import com.membase.jtap.message.Flag;
 import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
@@ -13,14 +13,12 @@ import com.membase.jtap.message.ResponseMessage;
 public class ListVBucketsStream implements TapStream{
 	private static final Logger LOG = LoggerFactory.getLogger(ListVBucketsStream.class);
 
-	private int count;
-	private String bucketName;
-	private String bucketPassword;
+	private long count;
+	private Exporter exporter;
 	private RequestMessage message;
 
-	public ListVBucketsStream(String bucketName, String bucketPassword, String identifier, int[] vbucketlist) {
-		this.bucketName = bucketName;
-		this.bucketPassword = bucketPassword;
+	public ListVBucketsStream(Exporter exporter, String identifier, int[] vbucketlist) {
+		this.exporter = exporter;
 		this.message = new RequestMessage();
 
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
@@ -28,21 +26,20 @@ public class ListVBucketsStream implements TapStream{
 		message.setFlags(Flag.LIST_VBUCKETS.flag);
 		message.setName(identifier);
 		message.setVbucketlist(vbucketlist);
+		
+		LOG.info("List vBucket tap stream created");
 	}
 
 	@Override
-	public TapStreamConfiguration getConfiguration() {
-		LOG.debug("sending configuration");
-		return new TapStreamConfiguration("testnode", bucketName, bucketPassword);
-	}
-
 	public RequestMessage getMessage() {
 		return message;
 	}
 
 	@Override
 	public void receive(ResponseMessage streamMessage) {
-		//System.out.println("Key: " + streamMessage.getKey());
-		count++;
+		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
+			exporter.write(streamMessage.getKey(), streamMessage.getValue());
+			count++;
+		}
 	}
 }

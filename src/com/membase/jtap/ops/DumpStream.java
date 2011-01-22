@@ -7,50 +7,42 @@ package com.membase.jtap.ops;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.membase.jtap.internal.TapStreamConfiguration;
+import com.membase.jtap.exporter.Exporter;
 import com.membase.jtap.message.Flag;
 import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 
-/**
- *
- */
 public class DumpStream implements TapStream {
 	private static final Logger LOG = LoggerFactory.getLogger(DumpStream.class);
 
-	private int count;
-	private String bucketName;
-	private String bucketPassword;
+	private long count;
 	private RequestMessage message;
+	private Exporter exporter;
 	
-	public DumpStream(String bucketName, String bucketPassword, String identifier) {
-		this.bucketName = bucketName;
-		this.bucketPassword = bucketPassword;
+	public DumpStream(Exporter exporter, String identifier) {
+		this.exporter = exporter;
 		this.message = new RequestMessage();
 		
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
 		message.setFlags(Flag.DUMP.flag);
 		message.setName(identifier);
-	}
-
-	@Override
-	public TapStreamConfiguration getConfiguration() {
-		LOG.debug("sending configuration");
-		return new TapStreamConfiguration("testnode", bucketName, bucketPassword);
+		
+		LOG.info("Dump tap stream created");
 	}
 	
+	@Override
 	public RequestMessage getMessage() {
 		return message;
 	}
 
 	@Override
 	public void receive(ResponseMessage streamMessage) {
-		System.out.println("Key: " + streamMessage.getKey());
-		System.out.println("Value: " + streamMessage.getValue());
-		count++;
-		System.out.println("Count: " + count);
+		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
+			exporter.write(streamMessage.getKey(), streamMessage.getValue());
+			count++;
+		}
 	}
 }
