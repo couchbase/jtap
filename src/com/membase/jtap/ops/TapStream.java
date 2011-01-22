@@ -4,7 +4,7 @@
 
 package com.membase.jtap.ops;
 
-import com.membase.jtap.TapStreamConfiguration;
+import com.membase.jtap.internal.TapStreamConfiguration;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2010 Membase. All Rights Reserved.
  */
 
-package com.membase.jtap;
+package com.membase.jtap.internal;
 
 import java.util.Date;
 

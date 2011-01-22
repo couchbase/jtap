@@ -11,15 +11,19 @@ public class RequestMessage extends BaseMessage{
 	private byte[] flags;
 	private byte[] backfilldate;
 	private byte[] vbucketlist;
+	private byte[] value;
 	
 	public RequestMessage() {
-		flags = new byte[FLAGS_FIELD_LENGTH];
+		flags = new byte[0];
 		name = new byte[0];
 		backfilldate = new byte[0];
 		vbucketlist = new byte[0];
+		value = new byte[0];
 	}
 	
 	public void setFlags(int f) {
+		if (flags.length != FLAGS_FIELD_LENGTH)
+			flags = new byte[FLAGS_FIELD_LENGTH];
 		longToField(flags, 0, FLAGS_FIELD_LENGTH, (long) f);
 		encode();
 	}
@@ -36,6 +40,8 @@ public class RequestMessage extends BaseMessage{
 	}
 	
 	public int getFlags() {
+		if (flags.length != FLAGS_FIELD_LENGTH)
+			return 0;
 		return (int) fieldToLong(flags, 0, FLAGS_FIELD_LENGTH);
 	}
 	
@@ -62,8 +68,13 @@ public class RequestMessage extends BaseMessage{
 		encode();
 	}
 	
+	public void setValue(String s) {
+		value = s.getBytes();
+		encode();
+	}
+	
 	private void encode() {
-		byte[] buffer = new byte[HEADER_LENGTH + name.length + flags.length + vbucketlist.length + backfilldate.length];
+		byte[] buffer = new byte[HEADER_LENGTH + name.length + flags.length + vbucketlist.length + backfilldate.length + value.length];
 		
 		int totalbody = 0; // Begin recording total body
 		int extralength = 0; // Begin recording extra length
@@ -84,6 +95,9 @@ public class RequestMessage extends BaseMessage{
 			for (int i = 0; i < vbucketlist.length; totalbody++, i++)
 				buffer[HEADER_LENGTH + totalbody] = vbucketlist[i];
 		}
+		
+		for (int i = 0; i < value.length; totalbody++, i++)
+			buffer[HEADER_LENGTH + totalbody] = value[i];
 		setTotalbody(totalbody); // Stop recording total body
 		
 		// Do this last because we had to figure out what total body and extra length were

@@ -37,7 +37,7 @@ public class BaseMessage {
 	}
 	
 	public final void setMagic(Magic m) {
-		mbytes[MAGIC_INDEX] = (byte) m.optionCode;
+		mbytes[MAGIC_INDEX] = (byte) m.magic;
 	}
 	
 	public final void setOpcode(Opcode o) {

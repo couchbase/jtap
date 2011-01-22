@@ -7,7 +7,7 @@ package com.membase.jtap.ops;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.membase.jtap.TapStreamConfiguration;
+import com.membase.jtap.internal.TapStreamConfiguration;
 import com.membase.jtap.message.Flag;
 import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
