@@ -28,13 +28,13 @@ public class RequestMessage extends BaseMessage{
 		encode();
 	}
 	
-	public void setBackfill(Date d) {
+	public void setBackfill(Date date) {
 		backfilldate = new byte[BACKFILL_DATE_FIELD_LENGTH];
-		if (d == null) {
+		if (date == null) {
 			for (int i = 0; i < 8; i++)
 				backfilldate[i] = -1;
 		} else {
-			longToField(backfilldate, 0, BACKFILL_DATE_FIELD_LENGTH, d.getTime());
+			longToField(backfilldate, 0, BACKFILL_DATE_FIELD_LENGTH, date.getTime());
 		}
 		encode();
 	}

@@ -1,5 +1,7 @@
 package com.membase.jtap.ops;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +12,10 @@ import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 
+/**
+ * BackfillStream is a template class for starting a basic tap connection to 
+ *
+ */
 public class BackfillStream implements TapStream {
 	private static final Logger LOG = LoggerFactory.getLogger(BackfillStream.class);
 
@@ -17,7 +23,7 @@ public class BackfillStream implements TapStream {
 	private Exporter exporter;
 	private RequestMessage message;
 
-	public BackfillStream(Exporter exporter, String identifier) {
+	public BackfillStream(Exporter exporter, String identifier, Date date) {
 		this.exporter = exporter;
 		this.message = new RequestMessage();
 
@@ -25,7 +31,7 @@ public class BackfillStream implements TapStream {
 		message.setOpcode(Opcode.REQUEST);
 		message.setFlags(Flag.BACKFILL.flag);
 		message.setName(identifier);
-		message.setBackfill(null);
+		message.setBackfill(date);
 		
 		LOG.info("Backfill tap stream created");
 	}
