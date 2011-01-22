@@ -84,24 +84,51 @@ public class CustomStream implements TapStream {
 		}
 	}
 	
+	/**
+	 * Specifies that this tap message will do backfill.
+	 * @param date The date to start backfill from, null for future.
+	 */
 	public void doBackfill(Date date) {
 		
 	}
 	
+	/**
+	 * Specifies that this tap message will dump all of its key value pairs
+	 */
 	public void doDump() {
 		
 	}
 	
+	/**
+	 * Specifies that this tap message will only track mutations on a given set of
+	 * buckets.
+	 * @param vbucketlist - A list of buckets to use
+	 */
 	public void specifyVbuckets(int[] vbucketlist) {
 		
 	}
 	
+	/**
+	 * Specifies that this tap message will recieve ack message from the membase node.
+	 */
 	public void supportAck() {
 		
 	}
 	
+	/**
+	 * Specifies that this tap message only wants to receive keys and not values.
+	 */
 	public void keysOnly() {
 
+	}
+	
+	/**
+	 * Specifies that the following vbuckets will be taken over by another membase node. They
+	 * will be deactivated on the Membase node that we connect to.
+	 * @param vbucketlist A list of vBuckets to take over
+	 */
+	public void takeoverVbuckets(int[] vbucketlist) {
+		
 	}
 
 	/**
