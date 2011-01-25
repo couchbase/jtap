@@ -12,13 +12,14 @@ import com.membase.jtap.ops.TapStream;
 public class TapRunner {
 	public static void main(String args[]) {
 		int[] vbucketlist = {1, 2, 1002};
-		Exporter exporter = new FileExporter("results");
+		//Exporter exporter = new FileExporter("results");
+		Exporter exporter = new TextExporter();
 		TapStream tapListener = new DumpStream(exporter, "node1");
 		//TapStream tapListener = new BackfillStream(exporter "node1");
 		//TapStreamConfig tapListener = new KeysOnlyStreamConfig(exporter "node1");
 		//TapStreamConfig tapListener = new ListVBucketsStreamConfig(exporter, vbucketlist);
 		//TapStreamClient client = new TapStreamClient("10.2.1.11", 11210, "saslbucket", "password");
-		TapStreamClient client = new TapStreamClient("10.2.1.11", 11210, "default", null);
+		TapStreamClient client = new TapStreamClient("50.16.64.130", 11210, "default", null);
 		client.start(tapListener);
 		/*try {
 			Thread.sleep(180000);

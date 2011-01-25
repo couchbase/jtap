@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.membase.jtap.internal.Response;
-import com.membase.jtap.message.BaseMessage;
+import com.membase.jtap.message.HeaderMessage;
 import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
@@ -36,7 +36,7 @@ public class SASLAuthenticator {
 	}
 	
 	public void handshake() {
-		BaseMessage request = new BaseMessage();
+		HeaderMessage request = new HeaderMessage();
 		ByteBuffer bytes;
 		request.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		request.setOpcode(Opcode.SASLLIST);

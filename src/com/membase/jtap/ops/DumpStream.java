@@ -39,7 +39,7 @@ public class DumpStream implements TapStream {
 		
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
-		message.setFlags(Flag.DUMP.flag);
+		message.setFlags(Flag.DUMP);
 		message.setName(identifier);
 		
 		LOG.info("Dump tap stream created");

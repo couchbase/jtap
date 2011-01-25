@@ -2,7 +2,15 @@ package com.membase.jtap.message;
 
 import java.util.Date;
 
-public class RequestMessage extends BaseMessage{
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.membase.jtap.TapStreamClient;
+import com.membase.jtap.internal.Util;
+
+public class RequestMessage extends HeaderMessage{
+	private static final Logger LOG = LoggerFactory.getLogger(RequestMessage.class);
+	
 	private static final int FLAGS_FIELD_LENGTH = 4;
 	private static final int BACKFILL_DATE_FIELD_LENGTH = 8;
 	private static final int VBUCKET_LIST_FIELD_LENGTH = 2;
@@ -21,11 +29,13 @@ public class RequestMessage extends BaseMessage{
 		value = new byte[0];
 	}
 	
-	public void setFlags(int f) {
+	public void setFlags(Flag f) {
 		if (flags.length != FLAGS_FIELD_LENGTH)
 			flags = new byte[FLAGS_FIELD_LENGTH];
-		longToField(flags, 0, FLAGS_FIELD_LENGTH, (long) f);
-		encode();
+		if (!f.hasFlag(getFlags())) {
+			Util.longToField(flags, 0, FLAGS_FIELD_LENGTH, (long) f.flag);
+			encode();
+		}
 	}
 	
 	public void setBackfill(Date date) {
@@ -34,7 +44,7 @@ public class RequestMessage extends BaseMessage{
 			for (int i = 0; i < 8; i++)
 				backfilldate[i] = -1;
 		} else {
-			longToField(backfilldate, 0, BACKFILL_DATE_FIELD_LENGTH, date.getTime());
+			Util.longToField(backfilldate, 0, BACKFILL_DATE_FIELD_LENGTH, date.getTime());
 		}
 		encode();
 	}
@@ -42,17 +52,18 @@ public class RequestMessage extends BaseMessage{
 	public int getFlags() {
 		if (flags.length != FLAGS_FIELD_LENGTH)
 			return 0;
-		return (int) fieldToLong(flags, 0, FLAGS_FIELD_LENGTH);
+		return (int) Util.fieldToLong(flags, 0, FLAGS_FIELD_LENGTH);
 	}
 	
 	public void setVbucketlist(int[] vbs) {
-		//TODO: Are the vbuckets greater than 1024
 		byte[] vblist = new byte[(vbs.length + 1) * VBUCKET_LIST_FIELD_LENGTH];
 		for (int i = 0; i < vbs.length + 1; i++) {
 			if (i == 0)
-				longToField(vblist, 0, VBUCKET_LIST_FIELD_LENGTH, (long) vbs.length);
+				Util.longToField(vblist, 0, VBUCKET_LIST_FIELD_LENGTH, (long) vbs.length);
+			else if (vbs[i] > TapStreamClient.NUM_VBUCKETS || vbs[i] < 0)
+				Util.longToField(vblist, (i * VBUCKET_LIST_FIELD_LENGTH), VBUCKET_LIST_FIELD_LENGTH, (long) vbs[i-1]);
 			else
-				longToField(vblist, (i * VBUCKET_LIST_FIELD_LENGTH), VBUCKET_LIST_FIELD_LENGTH, (long) vbs[i-1]);
+				LOG.info("vBucket ignored " + vbs[i] + "is not a valid vBucket number");
 		}
 		vbucketlist = vblist;
 		encode();

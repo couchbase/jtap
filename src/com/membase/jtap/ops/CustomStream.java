@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.membase.jtap.exception.FieldDoesNotExistException;
 import com.membase.jtap.exporter.Exporter;
+import com.membase.jtap.message.Flag;
 import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
@@ -37,6 +38,7 @@ public class CustomStream implements TapStream {
 	private long count;
 	private RequestMessage message;
 	private Exporter exporter;
+	private boolean keysonly;
 
 	/**
 	 * Creates a default custom stream. The custom tap stream starts out as a tap message header
@@ -49,6 +51,7 @@ public class CustomStream implements TapStream {
 		this.count = 0;
 		this.exporter = exporter;
 		this.message = new RequestMessage();
+		this.keysonly = false;
 
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
@@ -72,14 +75,20 @@ public class CustomStream implements TapStream {
 	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {
+		System.out.println("Bucket: " + streamMessage.getVbucket());
 		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
 			String key = streamMessage.getKey();
-			try {
-				String value = streamMessage.getValue();
-				exporter.write(key, value);
-			} catch (FieldDoesNotExistException e) {
+			if (!keysonly) {
+				try {
+					String value = streamMessage.getValue();
+					exporter.write(key, value);
+				} catch (FieldDoesNotExistException e) {
+					exporter.write(key);
+				}
+			} else {
 				exporter.write(key);
 			}
+				
 			count++;
 		}
 	}
@@ -89,14 +98,15 @@ public class CustomStream implements TapStream {
 	 * @param date The date to start backfill from, null for future.
 	 */
 	public void doBackfill(Date date) {
-		
+		message.setBackfill(date);
+		message.setFlags(Flag.BACKFILL);
 	}
 	
 	/**
 	 * Specifies that this tap message will dump all of its key value pairs
 	 */
 	public void doDump() {
-		
+		message.setFlags(Flag.DUMP);
 	}
 	
 	/**
@@ -105,21 +115,23 @@ public class CustomStream implements TapStream {
 	 * @param vbucketlist - A list of buckets to use
 	 */
 	public void specifyVbuckets(int[] vbucketlist) {
-		
+		message.setVbucketlist(vbucketlist);
+		message.setFlags(Flag.LIST_VBUCKETS);
 	}
 	
 	/**
 	 * Specifies that this tap message will recieve ack message from the membase node.
 	 */
 	public void supportAck() {
-		
+		message.setFlags(Flag.SUPPORT_ACK);
 	}
 	
 	/**
 	 * Specifies that this tap message only wants to receive keys and not values.
 	 */
 	public void keysOnly() {
-
+		message.setFlags(Flag.KEYS_ONLY);
+		keysonly = true;
 	}
 	
 	/**
@@ -128,7 +140,8 @@ public class CustomStream implements TapStream {
 	 * @param vbucketlist A list of vBuckets to take over
 	 */
 	public void takeoverVbuckets(int[] vbucketlist) {
-		
+		message.setVbucketlist(vbucketlist);
+		message.setFlags(Flag.TAKEOVER_VBUCKETS);
 	}
 
 	/**

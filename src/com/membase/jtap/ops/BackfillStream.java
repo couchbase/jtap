@@ -40,7 +40,7 @@ public class BackfillStream implements TapStream {
 
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
-		message.setFlags(Flag.BACKFILL.flag);
+		message.setFlags(Flag.BACKFILL);
 		message.setName(identifier);
 		message.setBackfill(date);
 		

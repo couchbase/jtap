@@ -39,7 +39,7 @@ public class KeysOnlyStream implements TapStream {
 		
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
-		message.setFlags(Flag.KEYS_ONLY.flag);
+		message.setFlags(Flag.KEYS_ONLY);
 		message.setName(identifier);
 		
 		LOG.info("Keys only tap stream created");

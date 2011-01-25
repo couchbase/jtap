@@ -40,7 +40,8 @@ public class TakeoverVBucketsStream implements TapStream {
 
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
-		message.setFlags(Flag.LIST_VBUCKETS.flag + Flag.TAKEOVER_VBUCKETS.flag);
+		message.setFlags(Flag.LIST_VBUCKETS);
+		message.setFlags(Flag.TAKEOVER_VBUCKETS);
 		message.setName(identifier);
 		message.setVbucketlist(vbucketlist);
 		

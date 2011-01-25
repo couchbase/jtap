@@ -6,38 +6,44 @@ package com.membase.jtap.message;
 
 import java.nio.ByteBuffer;
 
+import com.membase.jtap.internal.Util;
+
 /**
  *
  */
-public class BaseMessage {
-	protected static final int MAGIC_INDEX = 0;
-	protected static final int MAGIC_FIELD_LENGTH = 1;
-	protected static final int OPCODE_INDEX = 1;
-	protected static final int OPCODE_FIELD_LENGTH = 1;
-	protected static final int KEY_LENGTH_INDEX = 2;
-	protected static final int KEY_LENGTH_FIELD_LENGTH = 2;
-	protected static final int EXTRA_LENGTH_INDEX = 4;
-	protected static final int EXTRA_LENGTH_FIELD_LENGTH = 1;
-	protected static final int DATA_TYPE_INDEX = 5;
-	protected static final int DATA_TYPE_FIELD_LENGTH = 1;
-	protected static final int VBUCKET_INDEX = 6;
-	protected static final int VBUCKET_FIELD_LENGTH = 2;
-	protected static final int TOTAL_BODY_INDEX = 8;
-	protected static final int TOTAL_BODY_FIELD_LENGTH = 4;
-	protected static final int OPAQUE_INDEX = 12;
-	protected static final int OPAQUE_FIELD_LENGTH = 4;
-	protected static final int CAS_INDEX = 16;
-	protected static final int CAS_FIELD_LENGTH = 8;
-	protected static final int HEADER_LENGTH = 24;
+public class HeaderMessage {
+	public static final int MAGIC_INDEX = 0;
+	public static final int MAGIC_FIELD_LENGTH = 1;
+	public static final int OPCODE_INDEX = 1;
+	public static final int OPCODE_FIELD_LENGTH = 1;
+	public static final int KEY_LENGTH_INDEX = 2;
+	public static final int KEY_LENGTH_FIELD_LENGTH = 2;
+	public static final int EXTRA_LENGTH_INDEX = 4;
+	public static final int EXTRA_LENGTH_FIELD_LENGTH = 1;
+	public static final int DATA_TYPE_INDEX = 5;
+	public static final int DATA_TYPE_FIELD_LENGTH = 1;
+	public static final int VBUCKET_INDEX = 6;
+	public static final int VBUCKET_FIELD_LENGTH = 2;
+	public static final int TOTAL_BODY_INDEX = 8;
+	public static final int TOTAL_BODY_FIELD_LENGTH = 4;
+	public static final int OPAQUE_INDEX = 12;
+	public static final int OPAQUE_FIELD_LENGTH = 4;
+	public static final int CAS_INDEX = 16;
+	public static final int CAS_FIELD_LENGTH = 8;
+	public static final int HEADER_LENGTH = 24;
 	
 	protected byte[] mbytes;
 
-	public BaseMessage() {
+	public HeaderMessage() {
 		mbytes = new byte[HEADER_LENGTH];
 	}
 	
 	public final void setMagic(Magic m) {
 		mbytes[MAGIC_INDEX] = (byte) m.magic;
+	}
+	
+	public final int getMagic() {
+		return mbytes[MAGIC_INDEX];
 	}
 	
 	public final void setOpcode(Opcode o) {
@@ -49,11 +55,11 @@ public class BaseMessage {
 	}
 	
 	protected final void setKeylength(long l) {
-		longToField(mbytes, KEY_LENGTH_INDEX, KEY_LENGTH_FIELD_LENGTH, l);
+		Util.longToField(mbytes, KEY_LENGTH_INDEX, KEY_LENGTH_FIELD_LENGTH, l);
 	}
 	
 	public final int getKeylength() {
-		return (int) fieldToLong(mbytes, KEY_LENGTH_INDEX, KEY_LENGTH_FIELD_LENGTH);
+		return (int) Util.fieldToLong(mbytes, KEY_LENGTH_INDEX, KEY_LENGTH_FIELD_LENGTH);
 	}
 	
 	public final void setDatatype(byte b) {
@@ -72,36 +78,36 @@ public class BaseMessage {
 		return mbytes[EXTRA_LENGTH_INDEX];
 	}
 	
-	public final void setVbucket(byte b) {
-		
+	public final void setVbucket(int vb) {
+		Util.longToField(mbytes, VBUCKET_INDEX, VBUCKET_FIELD_LENGTH, vb);
 	}
 	
 	public final int getVbucket() {
-		return (int) fieldToLong(mbytes, VBUCKET_INDEX, VBUCKET_FIELD_LENGTH);
+		return (int) Util.fieldToLong(mbytes, VBUCKET_INDEX, VBUCKET_FIELD_LENGTH);
 	}
 	
 	public final void setTotalbody(long l) {
-		longToField(mbytes, TOTAL_BODY_INDEX, TOTAL_BODY_FIELD_LENGTH, l);
+		Util.longToField(mbytes, TOTAL_BODY_INDEX, TOTAL_BODY_FIELD_LENGTH, l);
 	}
 	
 	public final int getTotalbody() {
-		return (int) fieldToLong(mbytes, TOTAL_BODY_INDEX, TOTAL_BODY_FIELD_LENGTH);
+		return (int) Util.fieldToLong(mbytes, TOTAL_BODY_INDEX, TOTAL_BODY_FIELD_LENGTH);
 	}
 	
-	public final void setOpaque(byte b) {
-		
+	public final void setOpaque(int op) {
+		Util.longToField(mbytes, OPAQUE_INDEX, OPAQUE_FIELD_LENGTH, op);
 	}
 	
 	public final int getOpaque() {
-		return (int) fieldToLong(mbytes, OPAQUE_INDEX, OPAQUE_FIELD_LENGTH);
+		return (int) Util.fieldToLong(mbytes, OPAQUE_INDEX, OPAQUE_FIELD_LENGTH);
 	}
 	
-	public final void setCas(byte b) {
-		
+	public final void setCas(long cas) {
+		Util.longToField(mbytes, CAS_INDEX, CAS_FIELD_LENGTH, cas);
 	}
 	
 	public final long getCas() {
-		return fieldToLong(mbytes, CAS_INDEX, CAS_FIELD_LENGTH);
+		return Util.fieldToLong(mbytes, CAS_INDEX, CAS_FIELD_LENGTH);
 	}
 	
 	public final int getMessageLength() {
@@ -140,26 +146,5 @@ public class BaseMessage {
 		System.out.printf("Total Body: %d\n", getTotalbody());
 		System.out.printf("Opaque: %d\n", getOpaque());
 		System.out.printf("CAS: %d\n", getCas());
-	}
-	
-	protected long fieldToLong(byte[] buffer, int offset, int length) {
-		long total = 0;
-		long val = 0;
-		for (int i = 0; i < length; i++) {
-			val = buffer[offset + i];
-			if (val < 0)
-				val = val + 256;
-			total += (long)Math.pow(256.0, (double) (length - 1 - i)) * val;
-		}
-		return total;
-	}
-	
-	protected void longToField(byte[] buffer, int offset, int length, long l) {
-		long divisor;
-		for (int i = 0; i < length; i++) {
-			divisor = (long)Math.pow(256.0, (double) (length - 1 - i));
-			buffer[offset + i] = (byte) (l / divisor);
-			l = l % divisor;
-		}
 	}
 }

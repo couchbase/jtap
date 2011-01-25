@@ -10,9 +10,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import com.membase.jtap.internal.Response;
 import com.membase.jtap.internal.SASLAuthenticator;
+import com.membase.jtap.internal.Util;
+import com.membase.jtap.message.HeaderMessage;
 import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
@@ -26,6 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TapStreamClient {
 	private static final Logger LOG = LoggerFactory.getLogger(TapStreamClient.class);
+	public static final int NUM_VBUCKETS = 1024;
 	private static final String PROTOCOL = "memcached"; 
 	
 	private boolean started;
@@ -53,7 +57,7 @@ public class TapStreamClient {
 	}
 
 	public void start(TapStream tapStream) {
-		LOG.info("starting stream client");
+		LOG.info("Starting tap stream");
 		
 		if (password != null)
 			sasl = new SASLAuthenticator(host, PROTOCOL, bucket, password, wQueue);
@@ -61,7 +65,6 @@ public class TapStreamClient {
 		channel = connect(tapStream);
 		reader = new Thread(new SocketReader(rQueue, channel));
 		writer = new Thread(new SocketWriter(wQueue, channel));
-		mbuilder = new Thread(new ResponseMessageBuilder(rQueue, tapStream, sasl));
 		
 		reader.start();
 		writer.start();
@@ -77,33 +80,21 @@ public class TapStreamClient {
 		bytes = message.getBytes();
 		wQueue.add(new Response(bytes, bytes.capacity()));
 		started = true;
+		LOG.info("Tap stream started");
 	}
 
 	public void stop() {
 		if (started) {
-			LOG.info("stopping stream client");
+			LOG.info("Stopping Tap Stream");
 			if (channel.isOpen()) {
 				try {
 					channel.close();
 				} catch (IOException e) {
-					LOG.info("Error closing channel");
+					LOG.error("Error closing channel");
 					e.printStackTrace();
 				}
 			}
-			writer.interrupt();
-			reader.interrupt();
-			LOG.info("Draining the message queue");
-			while (rQueue.size() > 0) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-				}
-			}
-			LOG.info("Message Queue Drained");
-			mbuilder.interrupt();
 			LOG.info("Tap Stream Closed");
-			
-			
 		} else {
 			LOG.info("Tap stream not started. Cannot be stopped.");
 		}
@@ -134,87 +125,105 @@ public class TapStreamClient {
 	}
 }
 
-class ResponseMessageBuilder implements Runnable {
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseMessageBuilder.class);
-	private static final int HEADER_LENGTH = 24;
+class MessageBuilder implements Runnable {
+	private static final Logger LOG = LoggerFactory.getLogger(MessageBuilder.class);
 	
 	private BlockingQueue<Response> rQueue;
 	private TapStream tapStream;
-	private ResponseMessage message;
-	
-	private Response response;
-	private ByteBuffer buffer;
+	private Thread reader;
 	private SASLAuthenticator sasl;
-	int bufferLength;
-	int position;
-
-	byte[] hBuffer;
-	byte[] mBuffer;
 	
-	public ResponseMessageBuilder(BlockingQueue<Response> rQueue, TapStream tapStream, SASLAuthenticator sasl) {
+	private ByteBuffer bbuf;
+	int blen;
+	int bpos;
+
+	byte[] hbuf;
+	int mpos;
+	
+	int bodylen;
+	byte[] mbuf;
+	
+	public MessageBuilder(Thread reader, BlockingQueue<Response> rQueue, TapStream tapStream, SASLAuthenticator sasl) {
+		this.reader = reader;
 		this.rQueue = rQueue;
 		this.tapStream = tapStream;
-		this.message = null;
 		this.sasl = sasl;
 	}
 	
 	@Override
 	public void run() {
-		int bodyLength;
+		bodylen = 0;
+		mpos = 0;
+		boolean headerparsed = false;
 		
-		try {
+		while (reader.getState() != Thread.State.TERMINATED || rQueue.size() > 0) {
 			getNextResponse();
-			while(true) {
-				parseHeader();
-				bodyLength = getTotalBody();
-				mBuffer = new byte[HEADER_LENGTH + bodyLength];
-				
-				for (int i = 0; i < HEADER_LENGTH; i ++)
-					mBuffer[i] = hBuffer[i];
-				
-				for (int i = 0; i < bodyLength; i++, position++) {
-					if (position == bufferLength)
-						getNextResponse();
-					mBuffer[i + HEADER_LENGTH] = buffer.get(position);
+			if (bbuf != null) {
+				while (bpos < blen) {
+					if (!headerparsed)
+						headerparsed = parseHeader();
+					
+					if (headerparsed) {
+						for (; 0 < bodylen && bpos < blen; mpos++, bpos++, bodylen--)
+							mbuf[mpos] = bbuf.get(bpos);
+						
+						if (bodylen == 0) {
+							ResponseMessage message = new ResponseMessage(mbuf);
+							if (message.getOpcode() == Opcode.SASLLIST.opcode || message.getOpcode() == Opcode.SASLAUTH.opcode)
+								sasl.recieve(message);
+							else {
+								tapStream.receive(message);
+							}
+							headerparsed = false;
+							mpos = 0;
+						}
+					}
 				}
-				
-				message = new ResponseMessage(mBuffer);
-				if (message.getOpcode() == Opcode.SASLLIST.opcode || message.getOpcode() == Opcode.SASLAUTH.opcode)
-					sasl.recieve(message);
-				else
-					tapStream.receive(message);
+			}
+		}
+		LOG.info("MessageBuilder terminating");
+	}
+	
+	private boolean parseHeader() {
+		if (mpos == 0)
+			hbuf = new byte[HeaderMessage.HEADER_LENGTH];
+		
+		for (; mpos < HeaderMessage.HEADER_LENGTH && bpos < blen; bpos++, mpos++)
+			hbuf[mpos] = bbuf.get(bpos);
+		
+		if (bpos < blen) {
+			bodylen = (int) Util.fieldToLong(hbuf, HeaderMessage.TOTAL_BODY_INDEX, HeaderMessage.TOTAL_BODY_FIELD_LENGTH);
+			mbuf = new byte[HeaderMessage.HEADER_LENGTH + bodylen];
+			
+			for (int i = 0; i < HeaderMessage.HEADER_LENGTH; i++)
+				mbuf[i] = hbuf[i];
+			
+			return true;
+		}
+		return false;
+	}
+	
+	private void getNextResponse() {
+		try {
+			Response response = rQueue.poll(1000, TimeUnit.MILLISECONDS);
+			if (response == null) {
+				bbuf = null;
+				blen = 0;
+			} else {
+				bbuf = response.getBuffer();
+				blen = response.getBufferLength();
 			}
 		} catch (InterruptedException e) {
-			LOG.info("ResponseMessageBuilder terminating");
+			bbuf = null;
+			blen = 0;
 		}
-	}
-	
-	private void parseHeader() throws InterruptedException {
-		hBuffer = new byte[HEADER_LENGTH];
-		
-		for (int i = 0; i < HEADER_LENGTH; i++, position++) {
-			if (position == bufferLength)
-				getNextResponse();
-			hBuffer[i] = buffer.get(position);
-		}
-	}
-	
-	private int getTotalBody() {
-		//TODO: This is bad coding
-		return hBuffer[8] * 16777216 + hBuffer[9] * 65535 + hBuffer[10] * 256 + hBuffer[11];
-	}
-	
-	private void getNextResponse() throws InterruptedException {
-		response = rQueue.take();
-		buffer = response.getBuffer();
-		bufferLength = response.getBufferLength();
-		position = 0;
+		bpos = 0;
 	}
 }
 
 class SocketReader implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(SocketReader.class);
-	private static final int BUFFER_SIZE = 1024;
+	private static final int BUFFER_SIZE = 256;
 	
 	BlockingQueue<Response> rQueue;
 	SocketChannel channel;
@@ -235,11 +244,22 @@ class SocketReader implements Runnable {
 			    bytesRead = channel.read(rbuf);
 			    if (bytesRead > 0) {
 			    	rbuf.flip();
-			    	rQueue.add(new Response(rbuf, bytesRead));
+			    	rQueue.put(new Response(rbuf, bytesRead));
 			    }
 			} catch (IOException e) {
-			    System.out.println("Connection Closed");
+			    LOG.info("Connection Closed");
 			    bytesRead = -1;
+			} catch (InterruptedException e) {
+				LOG.info("Interrupted adding buffer to queue from SocketReader");
+				e.printStackTrace();
+			}
+		}
+		if (channel.isOpen()) {
+			try {
+				channel.close();
+			} catch (IOException e) {
+				LOG.info("Error closing connection to server");
+				e.printStackTrace();
 			}
 		}
 		LOG.info("SocketReader terminating");
@@ -262,20 +282,19 @@ class SocketWriter implements Runnable {
 		Response res;
 		ByteBuffer buffer;
 		try {
-			while (true) {
-				res = wQueue.take();
-				buffer = res.getBuffer();
-				buffer.position(0);
-				channel.write(buffer);
+			while (channel.isOpen()) {
+				res = wQueue.poll(1000, TimeUnit.MILLISECONDS);
+				if (res != null) {
+					buffer = res.getBuffer();
+					buffer.position(0);
+					channel.write(buffer);
+				}
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			LOG.error("Error communicating with Membase server");
 			e.printStackTrace();
 		}
-		
 		LOG.info("SocketWriter terminating");
 	}
 }
