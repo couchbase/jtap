@@ -9,11 +9,18 @@ import java.nio.ByteBuffer;
 import com.membase.jtap.internal.Util;
 
 /**
- * The HeaderMessage implements the header of a tap message. It should not be used to
- * create tap messages that have a body. 
+ * The HeaderMessage implements the header of a tap message. This class cannot be instantiated.
+ * To create tap stream messages see the RequestMessage and ResponseMessage classes.
  */
 public class HeaderMessage {
+	/**
+	 * The index of the magic field in a tap header
+	 */
 	public static final int MAGIC_INDEX = 0;
+	
+	/**
+	 * The length of the magic field in a tap header
+	 */
 	public static final int MAGIC_FIELD_LENGTH = 1;
 	public static final int OPCODE_INDEX = 1;
 	public static final int OPCODE_FIELD_LENGTH = 1;
@@ -56,11 +63,11 @@ public class HeaderMessage {
 	}
 	
 	protected final void setKeylength(long l) {
-		Util.longToField(mbytes, KEY_LENGTH_INDEX, KEY_LENGTH_FIELD_LENGTH, l);
+		Util.valueToField(mbytes, KEY_LENGTH_INDEX, KEY_LENGTH_FIELD_LENGTH, l);
 	}
 	
 	public final int getKeylength() {
-		return (int) Util.fieldToLong(mbytes, KEY_LENGTH_INDEX, KEY_LENGTH_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, KEY_LENGTH_INDEX, KEY_LENGTH_FIELD_LENGTH);
 	}
 	
 	public final void setDatatype(byte b) {
@@ -80,35 +87,35 @@ public class HeaderMessage {
 	}
 	
 	public final void setVbucket(int vb) {
-		Util.longToField(mbytes, VBUCKET_INDEX, VBUCKET_FIELD_LENGTH, vb);
+		Util.valueToField(mbytes, VBUCKET_INDEX, VBUCKET_FIELD_LENGTH, vb);
 	}
 	
 	public final int getVbucket() {
-		return (int) Util.fieldToLong(mbytes, VBUCKET_INDEX, VBUCKET_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, VBUCKET_INDEX, VBUCKET_FIELD_LENGTH);
 	}
 	
 	public final void setTotalbody(long l) {
-		Util.longToField(mbytes, TOTAL_BODY_INDEX, TOTAL_BODY_FIELD_LENGTH, l);
+		Util.valueToField(mbytes, TOTAL_BODY_INDEX, TOTAL_BODY_FIELD_LENGTH, l);
 	}
 	
 	public final int getTotalbody() {
-		return (int) Util.fieldToLong(mbytes, TOTAL_BODY_INDEX, TOTAL_BODY_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, TOTAL_BODY_INDEX, TOTAL_BODY_FIELD_LENGTH);
 	}
 	
 	public final void setOpaque(int op) {
-		Util.longToField(mbytes, OPAQUE_INDEX, OPAQUE_FIELD_LENGTH, op);
+		Util.valueToField(mbytes, OPAQUE_INDEX, OPAQUE_FIELD_LENGTH, op);
 	}
 	
 	public final int getOpaque() {
-		return (int) Util.fieldToLong(mbytes, OPAQUE_INDEX, OPAQUE_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, OPAQUE_INDEX, OPAQUE_FIELD_LENGTH);
 	}
 	
 	public final void setCas(long cas) {
-		Util.longToField(mbytes, CAS_INDEX, CAS_FIELD_LENGTH, cas);
+		Util.valueToField(mbytes, CAS_INDEX, CAS_FIELD_LENGTH, cas);
 	}
 	
 	public final long getCas() {
-		return Util.fieldToLong(mbytes, CAS_INDEX, CAS_FIELD_LENGTH);
+		return Util.fieldToValue(mbytes, CAS_INDEX, CAS_FIELD_LENGTH);
 	}
 	
 	public final int getMessageLength() {

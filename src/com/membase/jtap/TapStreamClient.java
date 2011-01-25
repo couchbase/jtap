@@ -193,7 +193,7 @@ class MessageBuilder implements Runnable {
 			hbuf[mpos] = bbuf.get(bpos);
 		
 		if (bpos < blen) {
-			bodylen = (int) Util.fieldToLong(hbuf, HeaderMessage.TOTAL_BODY_INDEX, HeaderMessage.TOTAL_BODY_FIELD_LENGTH);
+			bodylen = (int) Util.fieldToValue(hbuf, HeaderMessage.TOTAL_BODY_INDEX, HeaderMessage.TOTAL_BODY_FIELD_LENGTH);
 			mbuf = new byte[HeaderMessage.HEADER_LENGTH + bodylen];
 			
 			for (int i = 0; i < HeaderMessage.HEADER_LENGTH; i++)

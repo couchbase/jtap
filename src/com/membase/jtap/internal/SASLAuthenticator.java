@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.membase.jtap.internal.Response;
-import com.membase.jtap.message.HeaderMessage;
 import com.membase.jtap.message.Magic;
 import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;

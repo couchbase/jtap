@@ -1,7 +1,19 @@
 package com.membase.jtap.internal;
 
+/**
+ * The Util class provides utility functions for converting portions of byte
+ * arrays to values and putting values into byte arrays.
+ */
 public class Util {
-	public static long fieldToLong(byte[] buffer, int offset, int length) {
+	
+	/**
+	 * Converts a field in a byte array into a value.
+	 * @param buffer The byte array that contains the value
+	 * @param offset The offset of where the value begins in the byte array
+	 * @param length The length of the field to be converted
+	 * @return A long that represent the value of the field
+	 */
+	public static long fieldToValue(byte[] buffer, int offset, int length) {
 		long total = 0;
 		long val = 0;
 		for (int i = 0; i < length; i++) {
@@ -13,7 +25,14 @@ public class Util {
 		return total;
 	}
 	
-	public static void longToField(byte[] buffer, int offset, int length, long l) {
+	/**
+	 * Puts a value into a specific location in a byte array.
+	 * @param buffer The buffer that the value will be written to.
+	 * @param offset The offset for where the value begins in the array.
+	 * @param length The length of the field in the array
+	 * @param l The value to be encoded into the byte array
+	 */
+	public static void valueToField(byte[] buffer, int offset, int length, long l) {
 		long divisor;
 		for (int i = 0; i < length; i++) {
 			divisor = (long)Math.pow(256.0, (double) (length - 1 - i));

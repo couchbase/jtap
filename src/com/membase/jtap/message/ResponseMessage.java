@@ -30,56 +30,56 @@ public class ResponseMessage extends HeaderMessage{
 		if (ENGINE_PRIVATE_OFFSET + ENGINE_PRIVATE_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Engine Private field is not defined in this message");
 		int offset = HEADER_LENGTH + ENGINE_PRIVATE_OFFSET;
-		return Util.fieldToLong(mbytes, offset, ENGINE_PRIVATE_FIELD_LENGTH);
+		return Util.fieldToValue(mbytes, offset, ENGINE_PRIVATE_FIELD_LENGTH);
 	}
 	
 	public int getFlags() {
 		if (FLAGS_OFFSET + FLAGS_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Flags field is not defined in this message");
 		int offset = HEADER_LENGTH + FLAGS_OFFSET;
-		return (int) Util.fieldToLong(mbytes, offset, FLAGS_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, offset, FLAGS_FIELD_LENGTH);
 	}
 	
 	public int getTTL() {
 		if (TTL_OFFSET + TTL_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("TTL field is not defined in this message");
 		int offset = HEADER_LENGTH + TTL_OFFSET;
-		return (int) Util.fieldToLong(mbytes, offset, TTL_FIELD_LENGTH); 
+		return (int) Util.fieldToValue(mbytes, offset, TTL_FIELD_LENGTH); 
 	}
 	
 	public int getReserved1() {
 		if (RESERVED1_OFFSET + RESERVED1_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("First Reserved field is not defined in this message");
 		int offset = HEADER_LENGTH + RESERVED1_OFFSET;
-		return (int) Util.fieldToLong(mbytes, offset, RESERVED1_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, offset, RESERVED1_FIELD_LENGTH);
 	}
 	
 	public int getReserved2() {
 		if (RESERVED2_OFFSET + RESERVED2_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Second Reserved field is not defined in this message");
 		int offset = HEADER_LENGTH + RESERVED2_OFFSET;
-		return (int) Util.fieldToLong(mbytes, offset, RESERVED2_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, offset, RESERVED2_FIELD_LENGTH);
 	}
 	
 	public int getReserved3() {
 		if (RESERVED3_OFFSET + RESERVED3_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Third Reserved field is not defined in this message");
 		int offset = HEADER_LENGTH + RESERVED3_OFFSET;
-		return (int) Util.fieldToLong(mbytes, offset, RESERVED3_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, offset, RESERVED3_FIELD_LENGTH);
 	}
 	
 	public int getItemFlags() {
 		if (ITEM_FLAGS_OFFSET + ITEM_FLAGS_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Item Flags field is not defined in this message");
 		int offset = HEADER_LENGTH + ITEM_FLAGS_OFFSET;
-		return (int) Util.fieldToLong(mbytes, offset, ITEM_FLAGS_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, offset, ITEM_FLAGS_FIELD_LENGTH);
 	}
 	
 	public int getItemExpiry() {
 		if (ITEM_EXPIRY_OFFSET + ITEM_EXPIRY_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Item Flags field is not defined in this message");
 		int offset = HEADER_LENGTH + ITEM_EXPIRY_OFFSET;
-		return (int) Util.fieldToLong(mbytes, offset, ITEM_EXPIRY_FIELD_LENGTH);
+		return (int) Util.fieldToValue(mbytes, offset, ITEM_EXPIRY_FIELD_LENGTH);
 	}
 	
 	public String getKey() {

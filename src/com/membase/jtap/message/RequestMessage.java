@@ -33,7 +33,7 @@ public class RequestMessage extends HeaderMessage{
 		if (flags.length != FLAGS_FIELD_LENGTH)
 			flags = new byte[FLAGS_FIELD_LENGTH];
 		if (!f.hasFlag(getFlags())) {
-			Util.longToField(flags, 0, FLAGS_FIELD_LENGTH, (long) f.flag);
+			Util.valueToField(flags, 0, FLAGS_FIELD_LENGTH, (long) f.flag);
 			encode();
 		}
 	}
@@ -44,7 +44,7 @@ public class RequestMessage extends HeaderMessage{
 			for (int i = 0; i < 8; i++)
 				backfilldate[i] = -1;
 		} else {
-			Util.longToField(backfilldate, 0, BACKFILL_DATE_FIELD_LENGTH, date.getTime());
+			Util.valueToField(backfilldate, 0, BACKFILL_DATE_FIELD_LENGTH, date.getTime());
 		}
 		encode();
 	}
@@ -52,16 +52,16 @@ public class RequestMessage extends HeaderMessage{
 	public int getFlags() {
 		if (flags.length != FLAGS_FIELD_LENGTH)
 			return 0;
-		return (int) Util.fieldToLong(flags, 0, FLAGS_FIELD_LENGTH);
+		return (int) Util.fieldToValue(flags, 0, FLAGS_FIELD_LENGTH);
 	}
 	
 	public void setVbucketlist(int[] vbs) {
 		byte[] vblist = new byte[(vbs.length + 1) * VBUCKET_LIST_FIELD_LENGTH];
 		for (int i = 0; i < vbs.length + 1; i++) {
 			if (i == 0)
-				Util.longToField(vblist, 0, VBUCKET_LIST_FIELD_LENGTH, (long) vbs.length);
+				Util.valueToField(vblist, 0, VBUCKET_LIST_FIELD_LENGTH, (long) vbs.length);
 			else if (vbs[i] > TapStreamClient.NUM_VBUCKETS || vbs[i] < 0)
-				Util.longToField(vblist, (i * VBUCKET_LIST_FIELD_LENGTH), VBUCKET_LIST_FIELD_LENGTH, (long) vbs[i-1]);
+				Util.valueToField(vblist, (i * VBUCKET_LIST_FIELD_LENGTH), VBUCKET_LIST_FIELD_LENGTH, (long) vbs[i-1]);
 			else
 				LOG.info("vBucket ignored " + vbs[i] + "is not a valid vBucket number");
 		}
