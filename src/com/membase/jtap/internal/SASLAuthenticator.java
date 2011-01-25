@@ -36,11 +36,10 @@ public class SASLAuthenticator {
 	}
 	
 	public void handshake() {
-		HeaderMessage request = new HeaderMessage();
+		RequestMessage request = new RequestMessage();
 		ByteBuffer bytes;
 		request.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		request.setOpcode(Opcode.SASLLIST);
-		request.printMessage();
 		bytes = request.getBytes();
 		wQueue.add(new Response(bytes, bytes.capacity()));
 		

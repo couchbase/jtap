@@ -65,6 +65,7 @@ public class TapStreamClient {
 		channel = connect(tapStream);
 		reader = new Thread(new SocketReader(rQueue, channel));
 		writer = new Thread(new SocketWriter(wQueue, channel));
+		mbuilder = new Thread(new MessageBuilder(reader, rQueue, tapStream, sasl));
 		
 		reader.start();
 		writer.start();

@@ -9,7 +9,8 @@ import java.nio.ByteBuffer;
 import com.membase.jtap.internal.Util;
 
 /**
- *
+ * The HeaderMessage implements the header of a tap message. It should not be used to
+ * create tap messages that have a body. 
  */
 public class HeaderMessage {
 	public static final int MAGIC_INDEX = 0;
@@ -34,7 +35,7 @@ public class HeaderMessage {
 	
 	protected byte[] mbytes;
 
-	public HeaderMessage() {
+	protected HeaderMessage() {
 		mbytes = new byte[HEADER_LENGTH];
 	}
 	
