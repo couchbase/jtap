@@ -38,7 +38,7 @@ public class TapStreamClient {
 	private String password;
 	private int port;
 	private SocketChannel channel;
-	private BlockingQueue<Response> rQueue;
+	public BlockingQueue<Response> rQueue;
 	private BlockingQueue<Response> wQueue;
 	private SASLAuthenticator sasl;
 	private Thread mbuilder;
@@ -77,7 +77,6 @@ public class TapStreamClient {
 		LOG.info("initializing tap request");
 		RequestMessage message = tapStream.getMessage();
 		ByteBuffer bytes;
-		message.printMessage();
 		bytes = message.getBytes();
 		wQueue.add(new Response(bytes, bytes.capacity()));
 		started = true;
@@ -100,6 +99,10 @@ public class TapStreamClient {
 			LOG.info("Tap stream not started. Cannot be stopped.");
 		}
 	}
+	
+	public boolean isRunning() {
+		return channel.isOpen();
+	}
 
 	private SocketChannel connect(TapStream tapListener) {
 		InetSocketAddress socketAddress = new InetSocketAddress(host, port);
@@ -118,9 +121,8 @@ public class TapStreamClient {
 			e.printStackTrace();
 		}
 		
-		System.out.println("Connected: " + connected);
 		channel = sChannel;
-		LOG.info("connected to {}", socketAddress);
+		LOG.info("connected to ", socketAddress);
 		
 		return channel;
 	}
@@ -170,9 +172,9 @@ class MessageBuilder implements Runnable {
 						
 						if (bodylen == 0) {
 							ResponseMessage message = new ResponseMessage(mbuf);
-							if (message.getOpcode() == Opcode.SASLLIST.opcode || message.getOpcode() == Opcode.SASLAUTH.opcode)
+							if (message.getOpcode() == Opcode.SASLLIST.opcode || message.getOpcode() == Opcode.SASLAUTH.opcode) {
 								sasl.recieve(message);
-							else {
+							} else {
 								tapStream.receive(message);
 							}
 							headerparsed = false;
@@ -182,6 +184,8 @@ class MessageBuilder implements Runnable {
 				}
 			}
 		}
+		tapStream.cleanup();
+		LOG.info("Read " + tapStream.getCount() + " tap stream messages from Membase node");
 		LOG.info("MessageBuilder terminating");
 	}
 	

@@ -60,10 +60,10 @@ public class RequestMessage extends HeaderMessage{
 		for (int i = 0; i < vbs.length + 1; i++) {
 			if (i == 0)
 				Util.valueToField(vblist, 0, VBUCKET_LIST_FIELD_LENGTH, (long) vbs.length);
-			else if (vbs[i] > TapStreamClient.NUM_VBUCKETS || vbs[i] < 0)
+			else if (vbs[i-1] < TapStreamClient.NUM_VBUCKETS && vbs[i-1] >= 0)
 				Util.valueToField(vblist, (i * VBUCKET_LIST_FIELD_LENGTH), VBUCKET_LIST_FIELD_LENGTH, (long) vbs[i-1]);
 			else
-				LOG.info("vBucket ignored " + vbs[i] + "is not a valid vBucket number");
+				LOG.info("vBucket ignored " + vbs[i-1] + "is not a valid vBucket number");
 		}
 		vbucketlist = vblist;
 		encode();

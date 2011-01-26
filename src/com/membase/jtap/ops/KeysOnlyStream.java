@@ -60,10 +60,14 @@ public class KeysOnlyStream implements TapStream {
 	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {
-		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
+		if (streamMessage.getOpcode() == Opcode.OPAQUE.opcode) {
+			// Ignore
+		} else if (streamMessage.getOpcode() == Opcode.NOOP.opcode) {
+			// Ignore
+		} else {
 			exporter.write(streamMessage.getKey());
+			count++;
 		}
-		count++;
 	}
 
 	/**
@@ -72,6 +76,11 @@ public class KeysOnlyStream implements TapStream {
 	@Override
 	public long getCount() {
 		return count;
+	}
+
+	@Override
+	public void cleanup() {
+		exporter.close();
 	}
 }
 

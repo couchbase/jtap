@@ -66,11 +66,11 @@ public class SASLAuthenticator {
 				ByteBuffer bytes = saslRequest.getBytes();
 				wQueue.add(new Response(bytes, bytes.capacity()));
 			} catch (SaslException e) {
-				LOG.error("SASL Authentication Failed");
+				LOG.error("SASL authentication Failed");
 				System.exit(1);
 			}
 		} else {
-			LOG.info("SASL Authentication completed");
+			LOG.info("SASL authentication completed");
 		}
 	}
 }

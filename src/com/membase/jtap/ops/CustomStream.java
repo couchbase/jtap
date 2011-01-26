@@ -75,9 +75,16 @@ public class CustomStream implements TapStream {
 	 */
 	@Override
 	public void receive(ResponseMessage streamMessage) {
-		System.out.println("Bucket: " + streamMessage.getVbucket());
-		if (streamMessage.getOpcode() != Opcode.NOOP.opcode) {
+		if (streamMessage.getOpcode() == Opcode.OPAQUE.opcode) {
+			// Ignore
+		} else if (streamMessage.getOpcode() == Opcode.NOOP.opcode) {
+			// Ignore
+		} else {
 			String key = streamMessage.getKey();
+			if (key.equals("")) {
+				streamMessage.printMessage();
+				System.exit(0);
+			}
 			if (!keysonly) {
 				try {
 					String value = streamMessage.getValue();
@@ -87,9 +94,8 @@ public class CustomStream implements TapStream {
 				}
 			} else {
 				exporter.write(key);
+				count++;
 			}
-				
-			count++;
 		}
 	}
 	
@@ -123,7 +129,8 @@ public class CustomStream implements TapStream {
 	 * Specifies that this tap message will recieve ack message from the membase node.
 	 */
 	public void supportAck() {
-		message.setFlags(Flag.SUPPORT_ACK);
+		//message.setFlags(Flag.SUPPORT_ACK);
+		LOG.info("ACK not supported");
 	}
 	
 	/**
@@ -151,4 +158,10 @@ public class CustomStream implements TapStream {
 	public long getCount() {
 		return count;
 	}
+
+	@Override
+	public void cleanup() {
+		exporter.close();
+	}
+	
 }

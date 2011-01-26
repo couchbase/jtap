@@ -28,4 +28,9 @@ public interface TapStream {
 	 * Returns the number of messages that this tap stream has handled.
 	 */
 	long getCount();
+	
+	/**
+	 * Cleanups up the Exporter
+	 */
+	void cleanup();
 }
