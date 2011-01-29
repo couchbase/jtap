@@ -81,10 +81,6 @@ public class CustomStream implements TapStream {
 			// Ignore
 		} else {
 			String key = streamMessage.getKey();
-			if (key.equals("")) {
-				streamMessage.printMessage();
-				System.exit(0);
-			}
 			if (!keysonly) {
 				try {
 					String value = streamMessage.getValue();
@@ -94,8 +90,9 @@ public class CustomStream implements TapStream {
 				}
 			} else {
 				exporter.write(key);
-				count++;
 			}
+			count++;
+			//System.out.println(count);
 		}
 	}
 	

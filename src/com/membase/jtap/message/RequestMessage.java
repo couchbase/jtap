@@ -41,11 +41,11 @@ public class RequestMessage extends HeaderMessage{
 	public void setBackfill(Date date) {
 		backfilldate = new byte[BACKFILL_DATE_FIELD_LENGTH];
 		if (date == null) {
-			for (int i = 0; i < 8; i++)
+			for (int i = 0; i < 8; i++) 
 				backfilldate[i] = -1;
 		} else {
 			Util.valueToField(backfilldate, 0, BACKFILL_DATE_FIELD_LENGTH, date.getTime());
-		}
+		} 
 		encode();
 	}
 	

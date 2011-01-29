@@ -38,7 +38,7 @@ public class TapStreamClient {
 	private String password;
 	private int port;
 	private SocketChannel channel;
-	public BlockingQueue<Response> rQueue;
+	private BlockingQueue<Response> rQueue;
 	private BlockingQueue<Response> wQueue;
 	private SASLAuthenticator sasl;
 	private Thread mbuilder;
@@ -157,6 +157,8 @@ class MessageBuilder implements Runnable {
 	public void run() {
 		bodylen = 0;
 		mpos = 0;
+		double tot = 0;
+		double count = 0;
 		boolean headerparsed = false;
 		
 		while (reader.getState() != Thread.State.TERMINATED || rQueue.size() > 0) {
@@ -228,6 +230,7 @@ class MessageBuilder implements Runnable {
 
 class SocketReader implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(SocketReader.class);
+	private static final int MAX_RQUEUE_SIZE = 20480;
 	private static final int BUFFER_SIZE = 256;
 	
 	BlockingQueue<Response> rQueue;
@@ -243,6 +246,8 @@ class SocketReader implements Runnable {
 		ByteBuffer rbuf;
 		int bytesRead = 0;
 		while (bytesRead >= 0) {
+			if (rQueue.size() > MAX_RQUEUE_SIZE)
+				backoff();
 			rbuf = ByteBuffer.allocateDirect(BUFFER_SIZE);
 			try {
 			    rbuf.clear();
@@ -268,6 +273,16 @@ class SocketReader implements Runnable {
 			}
 		}
 		LOG.info("SocketReader terminating");
+	}
+	
+	private void backoff() {
+		try {
+			while (rQueue.size() > MAX_RQUEUE_SIZE) {
+				Thread.sleep(1000);
+			}
+		} catch (InterruptedException e) {
+			LOG.info("SocketReader backoff stopped");
+		}
 	}
 }
 
