@@ -67,7 +67,7 @@ public class BackfillStream implements TapStream {
 		} else if (streamMessage.getOpcode() == Opcode.NOOP.opcode) {
 			// Ignore
 		} else {
-			exporter.write(streamMessage.getKey(), streamMessage.getValue());
+			exporter.write(streamMessage);
 			count++;
 		}
 	}

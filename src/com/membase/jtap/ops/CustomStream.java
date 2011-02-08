@@ -5,7 +5,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.membase.jtap.exception.FieldDoesNotExistException;
 import com.membase.jtap.exporter.Exporter;
 import com.membase.jtap.message.Flag;
 import com.membase.jtap.message.Magic;
@@ -38,7 +37,6 @@ public class CustomStream implements TapStream {
 	private long count;
 	private RequestMessage message;
 	private Exporter exporter;
-	private boolean keysonly;
 
 	/**
 	 * Creates a default custom stream. The custom tap stream starts out as a tap message header
@@ -51,7 +49,6 @@ public class CustomStream implements TapStream {
 		this.count = 0;
 		this.exporter = exporter;
 		this.message = new RequestMessage();
-		this.keysonly = false;
 
 		message.setMagic(Magic.PROTOCOL_BINARY_REQ);
 		message.setOpcode(Opcode.REQUEST);
@@ -80,19 +77,8 @@ public class CustomStream implements TapStream {
 		} else if (streamMessage.getOpcode() == Opcode.NOOP.opcode) {
 			// Ignore
 		} else {
-			String key = streamMessage.getKey();
-			if (!keysonly) {
-				try {
-					String value = streamMessage.getValue();
-					exporter.write(key, value);
-				} catch (FieldDoesNotExistException e) {
-					exporter.write(key);
-				}
-			} else {
-				exporter.write(key);
-			}
+			exporter.write(streamMessage);
 			count++;
-			//System.out.println(count);
 		}
 	}
 	
@@ -135,7 +121,6 @@ public class CustomStream implements TapStream {
 	 */
 	public void keysOnly() {
 		message.setFlags(Flag.KEYS_ONLY);
-		keysonly = true;
 	}
 	
 	/**

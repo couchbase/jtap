@@ -1,5 +1,8 @@
 package com.membase.jtap.exporter;
 
+import com.membase.jtap.exception.FieldDoesNotExistException;
+import com.membase.jtap.message.ResponseMessage;
+
 public class TextExporter implements Exporter {
 	
 	public TextExporter() {
@@ -7,14 +10,15 @@ public class TextExporter implements Exporter {
 	}
 	
 	@Override
-	public void write(String key) {
-		System.out.println("Key: " + key);	
-	}
-
-	@Override
-	public void write(String key, String value) {
-		System.out.println("Key: " + key);
-		System.out.println("Value: " + value);
+	public void write(ResponseMessage message) {
+		try {
+			System.out.println(message.getKey());
+		} catch (FieldDoesNotExistException e) {
+		}
+		try {
+			System.out.println(message.getValue());
+		} catch (FieldDoesNotExistException e) {
+		}	
 	}
 
 	@Override

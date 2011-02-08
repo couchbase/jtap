@@ -7,6 +7,9 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.membase.jtap.exception.FieldDoesNotExistException;
+import com.membase.jtap.message.ResponseMessage;
+
 public class FileExporter implements Exporter {
 	private static final Logger LOG = LoggerFactory.getLogger(FileExporter.class);
 	
@@ -23,21 +26,23 @@ public class FileExporter implements Exporter {
 	}
 	
 	@Override
-	public void write(String key) {
+	public void write(ResponseMessage message) {
+		String key;
+		String value;
 		try {
-			out.write("Key: " + key + "\n");
+			key = message.getKey();
+		} catch (FieldDoesNotExistException e) {
+			key = null;
+		}
+		try {
+			value = message.getValue();
+		} catch (FieldDoesNotExistException e) {
+			value = null;
+		}
+		try {
+			out.write("Key: " + key + ", Value: " + value + "\n");
 		} catch (IOException e) {
 			LOG.info("Could not write key " + key + " to file");
-		}
-	}
-
-	@Override
-	public void write(String key, String value) {
-		try {
-			out.write("Key: " + key + "\n");
-			out.write("Value: " + value + "\n");
-		} catch (IOException e) {
-			LOG.info("Could not write key " + key + " and its value to file");
 		}
 	}
 

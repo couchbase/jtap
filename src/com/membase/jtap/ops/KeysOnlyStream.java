@@ -65,7 +65,7 @@ public class KeysOnlyStream implements TapStream {
 		} else if (streamMessage.getOpcode() == Opcode.NOOP.opcode) {
 			// Ignore
 		} else {
-			exporter.write(streamMessage.getKey());
+			exporter.write(streamMessage);
 			count++;
 		}
 	}

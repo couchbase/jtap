@@ -108,10 +108,9 @@ public class TapStreamClient {
 		InetSocketAddress socketAddress = new InetSocketAddress(host, port);
 
 		SocketChannel sChannel = null;
-		boolean connected = false;
 		try {
 			sChannel = SocketChannel.open();
-			connected = sChannel.connect(socketAddress);
+			sChannel.connect(socketAddress);
 			
 			while (!sChannel.finishConnect())
 					Thread.sleep(100);
@@ -157,8 +156,6 @@ class MessageBuilder implements Runnable {
 	public void run() {
 		bodylen = 0;
 		mpos = 0;
-		double tot = 0;
-		double count = 0;
 		boolean headerparsed = false;
 		
 		while (reader.getState() != Thread.State.TERMINATED || rQueue.size() > 0) {

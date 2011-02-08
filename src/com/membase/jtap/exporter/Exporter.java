@@ -1,7 +1,8 @@
 package com.membase.jtap.exporter;
 
+import com.membase.jtap.message.ResponseMessage;
+
 public interface Exporter {
-	public void write(String key);
-	public void write(String key, String value);
+	public void write(ResponseMessage message);
 	public void close();
 }

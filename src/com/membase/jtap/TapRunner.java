@@ -37,10 +37,10 @@ public class TapRunner {
 		}
 		System.exit(0);*/
 		CustomStream tapListener = new CustomStream(exporter, "node1");
-		//tapListener.keysOnly();
+		tapListener.keysOnly();
 		tapListener.doDump();
 		//tapListener.specifyVbuckets(vbucketlist);
-		TapStreamClient client = new TapStreamClient("10.2.1.11", 11210, "saslbucket", "password");
+		TapStreamClient client = new TapStreamClient("10.1.5.102", 11210, "default", null);
 		//TapStreamClient client = new TapStreamClient("10.2.1.11", 11210, "default", null);
 		client.start(tapListener);
 
