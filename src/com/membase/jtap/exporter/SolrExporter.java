@@ -80,6 +80,7 @@ public class SolrExporter implements Exporter {
 	public void write(ResponseMessage message) {
 		String key;
 		String value;
+		String expiration;
 		try {
 			key = message.getKey();
 		} catch (FieldDoesNotExistException e) {
@@ -91,7 +92,13 @@ public class SolrExporter implements Exporter {
 		} catch (FieldDoesNotExistException e) {
 			value = null;
 		}
-		String xml = buildXMLRequest(key, value);
+		try {
+			expiration = message.getItemExpiry() + "";
+		} catch (FieldDoesNotExistException e) {
+			expiration = null;
+		}
+		String xml = buildXMLRequest(key, value, expiration);
+		System.out.println("XML: " + xml);
 		try {
 			postData(xml);
 		} catch (Exception e) {
@@ -146,7 +153,7 @@ public class SolrExporter implements Exporter {
  		});
 	}
 	
-	private String buildXMLRequest(String key, String value) {
+	private String buildXMLRequest(String key, String value, String expiration) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		String xml = null;
 		try {
@@ -164,6 +171,8 @@ public class SolrExporter implements Exporter {
 		    	addFieldElement(document, doc, requestFormat.get(KEY), key);
 		    if (value != null)
 		    	addFieldElement(document, doc, requestFormat.get(VAL), value);
+		    if (expiration != null)
+		    	addFieldElement(document, doc, requestFormat.get(EXP), expiration);
 		    
 		    DOMSource domSource = new DOMSource(document);
 	        TransformerFactory tf = TransformerFactory.newInstance();
