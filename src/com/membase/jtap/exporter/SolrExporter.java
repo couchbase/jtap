@@ -44,7 +44,7 @@ public class SolrExporter implements Exporter {
 	private static final String EXP = "expiration";
 	private static final String DEF_KEY = "id";
 	private static final String DEF_VAL = "name";
-	private static final String DEF_EXP = "expiration";
+	private static final String DEF_EXP = "weight";
 	private static final int COMMIT_TIME = 15000;
 	
 	private HttpAsyncClient httpclient;
@@ -212,5 +212,12 @@ public class SolrExporter implements Exporter {
 			requestFormat.put(VAL, DEF_VAL);
 		else
 			requestFormat.put(VAL, id);
+	}
+	
+	public void setExpirationFieldName(String id) {
+		if (id == null)
+			requestFormat.put(EXP, DEF_EXP);
+		else
+			requestFormat.put(EXP, id);
 	}
 }
