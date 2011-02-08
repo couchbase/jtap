@@ -75,11 +75,11 @@ public class ResponseMessage extends HeaderMessage{
 		return (int) Util.fieldToValue(mbytes, offset, ITEM_FLAGS_FIELD_LENGTH);
 	}
 	
-	public int getItemExpiry() {
+	public long getItemExpiry() {
 		if (ITEM_EXPIRY_OFFSET + ITEM_EXPIRY_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Item Flags field is not defined in this message");
 		int offset = HEADER_LENGTH + ITEM_EXPIRY_OFFSET;
-		return (int) Util.fieldToValue(mbytes, offset, ITEM_EXPIRY_FIELD_LENGTH);
+		return Util.fieldToValue(mbytes, offset, ITEM_EXPIRY_FIELD_LENGTH);
 	}
 	
 	public String getKey() {

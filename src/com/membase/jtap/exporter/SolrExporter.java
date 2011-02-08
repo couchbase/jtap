@@ -98,7 +98,6 @@ public class SolrExporter implements Exporter {
 			expiration = null;
 		}
 		String xml = buildXMLRequest(key, value, expiration);
-		System.out.println("XML: " + xml);
 		try {
 			postData(xml);
 		} catch (Exception e) {
