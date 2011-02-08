@@ -15,7 +15,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -31,6 +30,13 @@ import org.w3c.dom.Element;
 
 import com.membase.jtap.exception.FieldDoesNotExistException;
 import com.membase.jtap.message.ResponseMessage;
+
+/**
+ * The solr exporter is used to export data from tap streams into a solr server. The solr exporter
+ * is implemented asynchronously in order to provide the highest throughput possible. The exporter
+ * sends rest update requests in xml to the solr server and commits all requests to the server after
+ * 15 seconds. 
+ */
 public class SolrExporter implements Exporter {
 	private static final Logger LOG = LoggerFactory.getLogger(SolrExporter.class);
 	private static final String KEY = "key";
@@ -49,6 +55,11 @@ public class SolrExporter implements Exporter {
 	private String host;
 	private HashMap<String, String> requestFormat;
 
+	/**
+	 * Creates a solr exorter.
+	 * @param host - the hostname of the solr server.
+	 * @throws IOReactorException
+	 */
 	public SolrExporter(String host) throws IOReactorException {
 		this.totalposts = 0;
 		this.completed = 0;
@@ -62,6 +73,9 @@ public class SolrExporter implements Exporter {
 		httpclient.start();
 	}
 
+	/**
+	 * Writes the contents of a message to the solr server.
+	 */
 	@Override
 	public void write(ResponseMessage message) {
 		String key;
@@ -85,6 +99,9 @@ public class SolrExporter implements Exporter {
 		}
 	}
 	
+	/**
+	 * Closes the connection to the solr server.
+	 */
 	@Override
 	public void close() {
 		try {
@@ -94,7 +111,7 @@ public class SolrExporter implements Exporter {
 		}
 	}
 
-	public void postData(String content) throws UnsupportedEncodingException  {
+	private void postData(String content) throws UnsupportedEncodingException  {
 		HttpPost request;
 		if ((en = System.currentTimeMillis()) - st > COMMIT_TIME) {
 			st = en;
@@ -175,6 +192,10 @@ public class SolrExporter implements Exporter {
 	    child.setTextContent(value);
 	}
 	
+	/**
+	 * Sets the field name that the key in a tap response message will be written to.
+	 * @param id The name of the field to write the key to.
+	 */
 	public void setKeyFieldName(String id) {
 		if (id == null)
 			requestFormat.put(KEY, DEF_KEY);
@@ -182,6 +203,10 @@ public class SolrExporter implements Exporter {
 			requestFormat.put(KEY, id);
 	}
 	
+	/**
+	 * Sets the field name that the value in a tap response message will be written to.
+	 * @param id The name of the field to write value key to.
+	 */
 	public void setValueFieldName(String id) {
 		if (id == null)
 			requestFormat.put(VAL, DEF_VAL);
