@@ -210,7 +210,7 @@ public class SolrExporter implements Exporter {
 		else
 			requestFormat.put(KEY, id);
 	}
-	
+
 	/**
 	 * Sets the field name that the value in a tap response message will be written to.
 	 * @param id The name of the field to write value key to.
@@ -221,7 +221,7 @@ public class SolrExporter implements Exporter {
 		else
 			requestFormat.put(VAL, id);
 	}
-	
+
 	public void setExpirationFieldName(String id) {
 		if (id == null)
 			requestFormat.put(EXP, DEF_EXP);
