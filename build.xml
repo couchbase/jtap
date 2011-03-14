@@ -14,8 +14,8 @@
           <include name="**/*.jar" />
         </fileset>
     </path>
-   	
- 	<target name="compile">
+   
+    <target name="compile">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="build.classpath" deprecation="on" includeantruntime="false">
           <compilerarg value="-Xlint:unchecked"/>
@@ -23,10 +23,10 @@
         <antcall target="makejar"/>
     </target>
 
-   	<target name ="makejar" description="Create a jar for the jtap project">
-		<jar jarfile="build/jtap.jar" includes="**/*.class" basedir="${classes.dir}"/>
-	</target>
-   	
+    <target name ="makejar" description="Create a jar for the jtap project">
+      <jar jarfile="build/jtap.jar" includes="**/*.class" basedir="${classes.dir}"/>
+    </target>
+
     <target name="clean">
        <delete includeemptydirs="true">
           <fileset dir="build" includes="**/*"/>
@@ -42,7 +42,5 @@
          </fileset>
       </javadoc>
    </target>
-   		
-
 </project>
 
