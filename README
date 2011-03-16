@@ -41,3 +41,12 @@ Example:
 	tapListener.keysOnly();
 	tapListener.doDump();
 	client.start(tapListener);
+
+Contact:
+	
+	For help with the java tap client post questions to the couchbase forum:
+	http://techzone.couchbase.com/forums/couchbase/couchbase-server
+
+
+	The full specification for the TAP protocol can be found here:
+	http://techzone.couchbase.com/wiki/display/membase/TAP+Protocol
