@@ -10,11 +10,18 @@ import org.slf4j.LoggerFactory;
 import com.membase.jtap.exception.FieldDoesNotExistException;
 import com.membase.jtap.message.ResponseMessage;
 
+/**
+ * Writes information from a tap stream to a specified file.
+ */
 public class FileExporter implements Exporter {
 	private static final Logger LOG = LoggerFactory.getLogger(FileExporter.class);
 	private FileWriter fstream;
 	private BufferedWriter out;
 	
+	/**
+	 * Creates a file exporter.
+	 * @param path The path of the file to write data to.
+	 */
 	public FileExporter(String path) {
 		 try{
 			fstream = new FileWriter(path);
@@ -24,6 +31,11 @@ public class FileExporter implements Exporter {
 		}
 	}
 	
+	/**
+	 * Writes the key name in the tap message an attempts to write the value
+	 * if it exists.
+	 * @param The tap message to export.
+	 */
 	@Override
 	public void write(ResponseMessage message) {
 		String key;
