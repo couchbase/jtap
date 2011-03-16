@@ -6,6 +6,10 @@ package com.membase.jtap.internal;
  */
 public class Util {
 	
+	private Util() {
+		
+	}
+	
 	/**
 	 * Converts a field in a byte array into a value.
 	 * @param buffer The byte array that contains the value
