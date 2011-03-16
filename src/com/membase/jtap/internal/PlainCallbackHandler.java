@@ -10,7 +10,7 @@ import javax.security.auth.callback.TextOutputCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
 /**
- * Callback handler for doing plain auth.
+ * Callback handler for doing plain sasl auth.
  */
 public class PlainCallbackHandler implements CallbackHandler {
 
@@ -28,6 +28,10 @@ public class PlainCallbackHandler implements CallbackHandler {
 		password=p.toCharArray();
 	}
 
+	/**
+	 * Handles a sasl callback and decides how to proceed with authentication.
+	 * @param callbacks The callback from sasl authentication.
+	 */
 	public void handle(Callback[] callbacks) throws IOException,
 			UnsupportedCallbackException {
 		for(Callback cb : callbacks) {
