@@ -3,12 +3,22 @@ package com.membase.jtap.exporter;
 import com.membase.jtap.exception.FieldDoesNotExistException;
 import com.membase.jtap.message.ResponseMessage;
 
+/**
+ * Prints tap message information out as a json to standard out.
+ */
 public class JSONExporter implements Exporter {
 	
+	/**
+	 * Creates a JSONExporter.
+	 */
 	public JSONExporter() {
 
 	}
 	
+	/**
+	 * Writes a tap messages key name and attempts to write its value if one exists.
+	 * @param message The tap message to export data from.
+	 */
 	@Override
 	public void write(ResponseMessage message) {
 		String key;
