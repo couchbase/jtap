@@ -23,9 +23,6 @@ Documentation:
 
 	Check out docs/javadocs/index.html
 
-	Documentation isn't fully completed, but the most important things should be there.
-	Updates coming soon.
-
 Using:
 
 	You need to create a TapStreamClient, an Exporter, and a TapStream. The
