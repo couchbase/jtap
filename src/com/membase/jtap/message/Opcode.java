@@ -1,5 +1,8 @@
 package com.membase.jtap.message;
 
+/**
+ * The Opcode enum contains a list all of the different opcodes that can be passed in a tap message in the flag field.
+ */
 public enum Opcode {
 	/**
 	 * Defines a tap no-op message
