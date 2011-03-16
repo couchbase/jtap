@@ -22,10 +22,18 @@ public class ResponseMessage extends HeaderMessage{
 	private static final int ITEM_EXPIRY_OFFSET = 11;
 	private static final int ITEM_EXPIRY_FIELD_LENGTH = 5;
 	
+	/**
+	 * Creates a ResponseMessage from binary data.
+	 * @param buffer The binary data sent from the tap stream server.
+	 */
 	public ResponseMessage(byte[] buffer) {
 		mbytes = buffer;
 	}
 	
+	/**
+	 * Gets the value of the engine private field if the field exists in the message.
+	 * @return The engine private data.
+	 */
 	public long getEnginePrivate() {
 		if (ENGINE_PRIVATE_OFFSET + ENGINE_PRIVATE_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Engine Private field is not defined in this message");
@@ -33,6 +41,10 @@ public class ResponseMessage extends HeaderMessage{
 		return Util.fieldToValue(mbytes, offset, ENGINE_PRIVATE_FIELD_LENGTH);
 	}
 	
+	/**
+	 * Gets the value of the flags field if the field exists in the message.
+	 * @return The flags data.
+	 */
 	public int getFlags() {
 		if (FLAGS_OFFSET + FLAGS_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Flags field is not defined in this message");
@@ -40,6 +52,10 @@ public class ResponseMessage extends HeaderMessage{
 		return (int) Util.fieldToValue(mbytes, offset, FLAGS_FIELD_LENGTH);
 	}
 	
+	/**
+	 * Gets the value of the ttl field if the field exists in the message.
+	 * @return The ttl data.
+	 */
 	public int getTTL() {
 		if (TTL_OFFSET + TTL_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("TTL field is not defined in this message");
@@ -47,6 +63,10 @@ public class ResponseMessage extends HeaderMessage{
 		return (int) Util.fieldToValue(mbytes, offset, TTL_FIELD_LENGTH); 
 	}
 	
+	/**
+	 * Gets the value of the reserved1 field if the field exists in the message.
+	 * @return The reserved1 data.
+	 */
 	public int getReserved1() {
 		if (RESERVED1_OFFSET + RESERVED1_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("First Reserved field is not defined in this message");
@@ -54,6 +74,10 @@ public class ResponseMessage extends HeaderMessage{
 		return (int) Util.fieldToValue(mbytes, offset, RESERVED1_FIELD_LENGTH);
 	}
 	
+	/**
+	 * Gets the value of the reserved2 field if the field exists in the message.
+	 * @return The reserved2 data.
+	 */
 	public int getReserved2() {
 		if (RESERVED2_OFFSET + RESERVED2_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Second Reserved field is not defined in this message");
@@ -61,6 +85,10 @@ public class ResponseMessage extends HeaderMessage{
 		return (int) Util.fieldToValue(mbytes, offset, RESERVED2_FIELD_LENGTH);
 	}
 	
+	/**
+	 * Gets the value of the reserved3 field if the field exists in the message.
+	 * @return The reserved3 data.
+	 */
 	public int getReserved3() {
 		if (RESERVED3_OFFSET + RESERVED3_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Third Reserved field is not defined in this message");
@@ -68,6 +96,10 @@ public class ResponseMessage extends HeaderMessage{
 		return (int) Util.fieldToValue(mbytes, offset, RESERVED3_FIELD_LENGTH);
 	}
 	
+	/**
+	 * Gets the value of the items flag field if the field exists in the message.
+	 * @return The items flag data.
+	 */
 	public int getItemFlags() {
 		if (ITEM_FLAGS_OFFSET + ITEM_FLAGS_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Item Flags field is not defined in this message");
@@ -75,6 +107,10 @@ public class ResponseMessage extends HeaderMessage{
 		return (int) Util.fieldToValue(mbytes, offset, ITEM_FLAGS_FIELD_LENGTH);
 	}
 	
+	/**
+	 * Gets the value of the item expiry field if the field exists in the message.
+	 * @return The item expiry data.
+	 */
 	public long getItemExpiry() {
 		if (ITEM_EXPIRY_OFFSET + ITEM_EXPIRY_FIELD_LENGTH > getExtralength())
 			throw new FieldDoesNotExistException("Item Flags field is not defined in this message");
@@ -82,6 +118,10 @@ public class ResponseMessage extends HeaderMessage{
 		return Util.fieldToValue(mbytes, offset, ITEM_EXPIRY_FIELD_LENGTH);
 	}
 	
+	/**
+	 * Gets the value of the key field if the field exists in the message.
+	 * @return The key data.
+	 */
 	public String getKey() {
 		if (getExtralength() >= getTotalbody())
 			throw new FieldDoesNotExistException("Key field is not defined in this message");
@@ -89,6 +129,10 @@ public class ResponseMessage extends HeaderMessage{
 		return new String(mbytes, offset, getKeylength());
 	}
 	
+	/**
+	 * Gets the value of the value field if the field exists in the message.
+	 * @return The value data.
+	 */
 	public String getValue() {
 		if (getExtralength() + getKeylength() >= getTotalbody())
 			throw new FieldDoesNotExistException("Value field is not defined in this message");
@@ -97,6 +141,9 @@ public class ResponseMessage extends HeaderMessage{
 		return new String(mbytes, offset, length);
 	}
 	
+	/**
+	 * Prints out the details of a response message for debugging purposes.
+	 */
 	public void printMessageDetails() {
 		super.printMessageDetails();
 		System.out.printf("Engine Private: %d\n", getEnginePrivate());
