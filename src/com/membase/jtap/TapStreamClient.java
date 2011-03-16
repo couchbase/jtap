@@ -45,6 +45,13 @@ public class TapStreamClient {
 	private Thread reader;
 	private Thread writer;
 	
+	/**
+	 * Creates a tap stream client.
+	 * @param host The server to create a tap stream for.
+	 * @param port The port number for the server (Typically 11210).
+	 * @param bucket The name of the bucket to create a tap stream for.
+	 * @param password The password for the bucket, null is there is none.
+	 */
 	public TapStreamClient(String host, int port, String bucket, String password) {
 		started = false;
 		this.host = host;
@@ -56,6 +63,10 @@ public class TapStreamClient {
 		sasl = null;
 	}
 
+	/**
+	 * Starts a tap stream
+	 * @param tapStream The tap stream configuration
+	 */
 	public void start(TapStream tapStream) {
 		LOG.info("Starting tap stream");
 		
@@ -83,6 +94,9 @@ public class TapStreamClient {
 		LOG.info("Tap stream started");
 	}
 
+	/**
+	 * Stops a tap stream.
+	 */
 	public void stop() {
 		if (started) {
 			LOG.info("Stopping Tap Stream");
@@ -100,6 +114,10 @@ public class TapStreamClient {
 		}
 	}
 	
+	/**
+	 * Checks to see if there is a tap stream currently running.
+	 * @return true if the tap stream is running, false otherwise.
+	 */
 	public boolean isRunning() {
 		return channel.isOpen();
 	}
@@ -127,6 +145,9 @@ public class TapStreamClient {
 	}
 }
 
+/**
+ * Builds tap messages given a stream of binary
+ */
 class MessageBuilder implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(MessageBuilder.class);
 	
@@ -225,6 +246,9 @@ class MessageBuilder implements Runnable {
 	}
 }
 
+/**
+ * Synchronously reads binary data from a socket.
+ */
 class SocketReader implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(SocketReader.class);
 	private static final int MAX_RQUEUE_SIZE = 20480;
@@ -283,6 +307,9 @@ class SocketReader implements Runnable {
 	}
 }
 
+/**
+ * Writes message to the server to initiate and maintain tap streams
+ */
 class SocketWriter implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(SocketReader.class);
 	
