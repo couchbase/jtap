@@ -18,7 +18,7 @@ public class FieldDoesNotExistException extends RuntimeException{
 	 * Constructs an FieldDoesNotExistException with the specified detail message. 
 	 * The error message string s can later be retrieved by the Throwable.getMessage()
 	 * method of class java.lang.Throwable.
-	 * @param message - the detail message
+	 * @param message The detail message
 	 */
 	public FieldDoesNotExistException(String message) {
         super(message);
