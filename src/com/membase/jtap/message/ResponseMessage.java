@@ -3,6 +3,9 @@ package com.membase.jtap.message;
 import com.membase.jtap.exception.FieldDoesNotExistException;
 import com.membase.jtap.internal.Util;
 
+/**
+ * A representation of a tap stream message sent from a tap stream server.
+ */
 public class ResponseMessage extends HeaderMessage{
 	// Offsets are given from the end of the header
 	private static final int ENGINE_PRIVATE_OFFSET = 0;
