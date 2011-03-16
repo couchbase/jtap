@@ -12,9 +12,8 @@ import com.membase.jtap.message.ResponseMessage;
 
 public class FileExporter implements Exporter {
 	private static final Logger LOG = LoggerFactory.getLogger(FileExporter.class);
-	
-	FileWriter fstream;
-	BufferedWriter out;
+	private FileWriter fstream;
+	private BufferedWriter out;
 	
 	public FileExporter(String path) {
 		 try{
