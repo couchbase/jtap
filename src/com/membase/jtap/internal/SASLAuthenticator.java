@@ -16,6 +16,10 @@ import com.membase.jtap.message.Opcode;
 import com.membase.jtap.message.RequestMessage;
 import com.membase.jtap.message.ResponseMessage;
 
+/**
+ * The SASLAuthenticator class provides support for access to Membase buckets that require
+ * SASL authentication.
+ */
 public class SASLAuthenticator {
 	private static final Logger LOG = LoggerFactory.getLogger(SASLAuthenticator.class);
 	private static final String[] mechanisms = new String[] {"PLAIN"};
@@ -23,6 +27,14 @@ public class SASLAuthenticator {
 	private BlockingQueue<Response> wQueue;
 	private SaslClient sasl;
 	
+	/**
+	 * Creates a SASLAuthenticator.
+	 * @param address The ip address of the server to authenticate with.
+	 * @param protocol The protocol to use.
+	 * @param bucketname The name of the bucket to authenticate.
+	 * @param password The password for that bucket.
+	 * @param wQueue The write queue to use for communicating with the server.
+	 */
 	public SASLAuthenticator(String address, String protocol, String bucketname, String password,
 			BlockingQueue<Response> wQueue) {
 		this.wQueue = wQueue;
@@ -34,6 +46,9 @@ public class SASLAuthenticator {
 		}
 	}
 	
+	/**
+	 * Do a SASL handshake.
+	 */
 	public void handshake() {
 		RequestMessage request = new RequestMessage();
 		ByteBuffer bytes;
@@ -52,6 +67,10 @@ public class SASLAuthenticator {
 		}
 	}
 	
+	/**
+	 * Recieve SASL messages from the server and decide how to proceed in the handshake process.
+	 * @param message The SASL response from the server.
+	 */
 	public void recieve(ResponseMessage message) {
 		if (!sasl.isComplete()) {
 			try {
