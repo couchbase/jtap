@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * TapStreamClient is the main interface for creating and managing tap streams for
+ * Membase Server.
  */
 public class TapStreamClient {
 	private static final Logger LOG = LoggerFactory.getLogger(TapStreamClient.class);
