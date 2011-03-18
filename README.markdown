@@ -13,13 +13,13 @@
 
 # Building
 
-    ant build
+    ant
 
 A jar should be generated in the build folder
 
 # Documentation
 
-    ant docs
+    ant doc
 
 Check out docs/javadocs/index.html
 
